@@ -9,6 +9,6 @@
     },
 
     "include": [
-        "source/**/*"
+        "source/**/*.ts"
     ],
 }
