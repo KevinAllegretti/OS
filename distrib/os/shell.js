@@ -21,6 +21,10 @@ var TSOS;
             var sc;
             //
             // Load the command list.
+            //Lab 1: new commands, make them concise and similiar structure to the other commands
+            //date
+            sc = new TSOS.ShellCommand(this.shellDate, "date", "- Displays the current date and time.");
+            this.commandList[this.commandList.length] = sc;
             // ver
             sc = new TSOS.ShellCommand(this.shellVer, "ver", "- Displays the current version.");
             this.commandList[this.commandList.length] = sc;
@@ -166,6 +170,12 @@ var TSOS;
         }
         // Although args is unused in some of these functions, it is always provided in the 
         // actual parameter list when this function is called, so I feel like we need it.
+        //Lab 1 commands:
+        //date
+        shellDate(args) {
+            const currentDate = new Date();
+            _StdOut.putText("Current date and time: " + currentDate.toString());
+        }
         shellVer(args) {
             _StdOut.putText(APP_NAME + " version " + APP_VERSION);
         }
