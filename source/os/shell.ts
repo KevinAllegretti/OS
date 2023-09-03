@@ -33,6 +33,11 @@ module TSOS {
                                   "- Displays the current date and time.");
             this.commandList[this.commandList.length] = sc;
 
+            //whereami
+            sc = new ShellCommand(this.shellWhereAmI,
+                                  "whereami",
+                                  "- Displays the user's current location (use your imagination).");
+            this.commandList[this.commandList.length] = sc;
 
             // ver
             sc = new ShellCommand(this.shellVer,
@@ -218,6 +223,21 @@ module TSOS {
         public shellDate(args: string[]) {
             const currentDate = new Date();
             _StdOut.putText("Current date and time: " + currentDate.toString());
+        }
+
+        //whereami
+        /* This funciton will be improved on in the future based on certain user actions or inputs. 
+        For now, I want to put all of the locations in an array and return the first location being the 'homebase' */
+        public shellWhereAmI(args: string[]) {
+            //Array of locations. These are a few locations from 'Fall Out New Vegas'
+            const locations = [
+                "Location: (Homebase) Harper's Shack, on the east end of Primm Pass, southwest of Novac",
+                "Location: Wolfhorn Ranch",
+                "Location: The Humble Sealed Sewers",
+                "Location: You find yourself in the Devils Gullet.",
+                "Location: Colonial Taphouse",
+            ];
+            _StdOut.putText(locations[0]);
         }
 
         public shellVer(args: string[]) {
