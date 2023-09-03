@@ -268,10 +268,36 @@ module TSOS {
             if (args.length > 0) {
                 var topic = args[0];
                 switch (topic) {
-                    case "help":
-                        _StdOut.putText("Help displays a list of (hopefully) valid commands.");
+                    case "date":
+                        _StdOut.putText("Date displays the current date and time.")
                         break;
-                    // TODO: Make descriptive MANual page entries for the the rest of the shell commands here.
+                    case "whereami":
+                        _StdOut.putText("Displays the user's current location.")
+                        break;
+                    case "ver":
+                        _StdOut.putText("Ver displays the current version of the operating system.")
+                        break;
+                    case "help":
+                        _StdOut.putText("Help displays a list of available commands.")
+                        break;
+                    case "shutdown":
+                        _StdOut.putText("Shuts down the virtual OS but leaves the underlying host / hardware simulation running.");
+                        break;
+                    case "cls":
+                        _StdOut.putText("Clears the screen and resets the cursor position.")
+                        break;
+                    case "man":
+                        _StdOut.putText("Displays the MANual page for <topic>.")
+                        break;
+                    case "trace":
+                        _StdOut.putText("Turns the OS trace on or off.")
+                        break;
+                    case "trot13":
+                        _StdOut.putText("Does rot13 obfuscation on <string>.")
+                        break;
+                    case "prompt":
+                        _StdOut.putText("Sets the prompt")
+                        break;
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
                 }

@@ -26,7 +26,7 @@ var TSOS;
             sc = new TSOS.ShellCommand(this.shellDate, "date", "- Displays the current date and time.");
             this.commandList[this.commandList.length] = sc;
             //whereami
-            sc = new TSOS.ShellCommand(this.shellWhereAmI, "whereami", "- Displays the user's current location (use your imagination).");
+            sc = new TSOS.ShellCommand(this.shellWhereAmI, "whereami", "- Displays the user's current location.");
             this.commandList[this.commandList.length] = sc;
             // ver
             sc = new TSOS.ShellCommand(this.shellVer, "ver", "- Displays the current version.");
