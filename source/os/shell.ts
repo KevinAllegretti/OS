@@ -39,6 +39,9 @@ module TSOS {
                                   "- Displays the user's current location.");
             this.commandList[this.commandList.length] = sc;
 
+            sc = new ShellCommand(this.shellQuests,
+                                  "quests",
+                                  "- Displays the current quests.")
             // ver
             sc = new ShellCommand(this.shellVer,
                                   "ver",
@@ -240,6 +243,21 @@ module TSOS {
             _StdOut.putText(locations[0]);
         }
 
+        //New function with an array of quests.
+        public shellQuests = [
+            {
+                name: "Find the Lost Vault Key",
+                description: "Locate the missing key to Vault 42.",
+                status: "Incomplete"
+            },
+            {
+                name: "Rescue the Wasteland Wanderer",
+                description: "Save a stranded traveler from a raider camp.",
+                status: "Incomplete"
+            },
+        ];
+
+
         public shellVer(args: string[]) {
             _StdOut.putText(APP_NAME + " version " + APP_VERSION);
         }
@@ -273,6 +291,13 @@ module TSOS {
                         break;
                     case "whereami":
                         _StdOut.putText("Displays the user's current location.")
+                        break;
+                    case "quest":
+                        _StdOut.putText("Quests:");
+                            for (let i = 0; i < this.shellQuests.length; i++) {
+                                _StdOut.advanceLine();
+                                _StdOut.putText(` ${this.shellQuests[i].name}: ${this.shellQuests[i].description}`);
+                            }
                         break;
                     case "ver":
                         _StdOut.putText("Ver displays the current version of the operating system.")
