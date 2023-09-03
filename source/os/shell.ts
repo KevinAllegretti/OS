@@ -36,7 +36,7 @@ module TSOS {
             //whereami
             sc = new ShellCommand(this.shellWhereAmI,
                                   "whereami",
-                                  "- Displays the user's current location (use your imagination).");
+                                  "- Displays the user's current location.");
             this.commandList[this.commandList.length] = sc;
 
             // ver
