@@ -28,6 +28,9 @@ var TSOS;
             //whereami
             sc = new TSOS.ShellCommand(this.shellWhereAmI, "whereami", "- Displays the user's current location.");
             this.commandList[this.commandList.length] = sc;
+            //quests
+            sc = new TSOS.ShellCommand(this.shellQuests, "quests", "- Displays the current quests.");
+            this.commandList[this.commandList.length] = sc;
             // ver
             sc = new TSOS.ShellCommand(this.shellVer, "ver", "- Displays the current version.");
             this.commandList[this.commandList.length] = sc;
@@ -193,6 +196,21 @@ var TSOS;
             ];
             _StdOut.putText(locations[0]);
         }
+        //New function with objects of quests.
+        shellQuests() {
+            return [
+                {
+                    name: "Find the Lost Vault Key",
+                    description: "Locate the missing key to Vault 42.",
+                    status: "Incomplete"
+                },
+                {
+                    name: "Rescue the Wasteland Wanderer",
+                    description: "Save a stranded traveler from a raider camp.",
+                    status: "Incomplete"
+                },
+            ];
+        }
         shellVer(args) {
             _StdOut.putText(APP_NAME + " version " + APP_VERSION);
         }
@@ -222,6 +240,13 @@ var TSOS;
                         break;
                     case "whereami":
                         _StdOut.putText("Displays the user's current location.");
+                        break;
+                    case "quests":
+                        _StdOut.putText("Quests:");
+                        for (let i = 0; i < this.shellQuests.length; i++) {
+                            _StdOut.advanceLine();
+                            _StdOut.putText(` ${this.shellQuests[i].name}: ${this.shellQuests[i].description}`);
+                        }
                         break;
                     case "ver":
                         _StdOut.putText("Ver displays the current version of the operating system.");

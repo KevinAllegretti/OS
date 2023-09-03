@@ -38,10 +38,11 @@ module TSOS {
                                   "whereami",
                                   "- Displays the user's current location.");
             this.commandList[this.commandList.length] = sc;
-
-            sc = new ShellCommand(this.shellQuests,
-                                  "quests",
-                                  "- Displays the current quests.")
+            //stats
+            sc = new ShellCommand(this.shellStats,
+                                  "stats",
+                                  "- Display system statistics.");
+            this.commandList[this.commandList.length] = sc;
             // ver
             sc = new ShellCommand(this.shellVer,
                                   "ver",
@@ -243,19 +244,29 @@ module TSOS {
             _StdOut.putText(locations[0]);
         }
 
-        //New function with an array of quests.
-        public shellQuests = [
-            {
-                name: "Find the Lost Vault Key",
-                description: "Locate the missing key to Vault 42.",
-                status: "Incomplete"
-            },
-            {
-                name: "Rescue the Wasteland Wanderer",
-                description: "Save a stranded traveler from a raider camp.",
-                status: "Incomplete"
-            },
-        ];
+        //Stats funciton 
+        /*Since I'm basing this OS off of Fallout, I think we should have stats like
+        health, level, radiaiton and a few others.*/
+        
+        public shellStats(args: string[]) {
+            // Define player stats through a object
+            let playerStats = {
+                health: 100,
+                stamina: 100,
+                radiation: 0,
+                level: 1
+            };
+        
+            _StdOut.putText("Player Stats:");
+            _StdOut.advanceLine();
+            _StdOut.putText(`Health: ${playerStats.health}`);
+            _StdOut.advanceLine();
+            _StdOut.putText(`Stamina: ${playerStats.stamina}`);
+            _StdOut.advanceLine();
+            _StdOut.putText(`Radiation: ${playerStats.radiation}`);
+            _StdOut.advanceLine();
+            _StdOut.putText(`Level: ${playerStats.level}`);
+        }
 
 
         public shellVer(args: string[]) {
@@ -292,12 +303,8 @@ module TSOS {
                     case "whereami":
                         _StdOut.putText("Displays the user's current location.")
                         break;
-                    case "quest":
-                        _StdOut.putText("Quests:");
-                            for (let i = 0; i < this.shellQuests.length; i++) {
-                                _StdOut.advanceLine();
-                                _StdOut.putText(` ${this.shellQuests[i].name}: ${this.shellQuests[i].description}`);
-                            }
+                    case "stats":
+                         _StdOut.putText("Stats displays the player's current stats including health, stamina, radiation, and level.");
                         break;
                     case "ver":
                         _StdOut.putText("Ver displays the current version of the operating system.")
