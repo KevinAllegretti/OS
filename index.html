@@ -67,6 +67,35 @@
              onclick="TSOS.Control.hostBtnReset_click(this);">
    </div>
 
+   <!-- Create the IDS for the graphics task or status bar above the canvas -->
+   <div id = "graphicTaskBar">
+      <p><span id = "currentDateTime"> </span></p>
+      <p><span id = "Status"> </span></p>
+   </div>
+
+   <!-- Implement functions for the date and time with JS getElementByID -->
+   <script>
+      function dateTime() {
+          const currentDateTime = new Date().toLocaleString();
+          document.getElementById("currentDateTime").textContent = "Date: " + currentDateTime;
+      }
+  
+      window.onload = function() {
+          onDocumentLoad();
+          dateTime();
+          setInterval(dateTime, 1000);
+      }
+  </script>
+  
+   <!-- Same JS functions for status-->
+   <script>
+      function statusMessage(message) {
+         document.getElementById("Status").textContent = "Status: " + message;
+      }
+      statusMessage("Alive and Healthy!");
+  </script>
+  
+
    <div id="divConsole" style="margin:4px; width:500px; height:500px; float:left;">
       <canvas id="display"
               width="500px"
