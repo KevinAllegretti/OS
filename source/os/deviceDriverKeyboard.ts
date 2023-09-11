@@ -78,6 +78,9 @@ module TSOS {
             else if (keyCode == 32 || keyCode == 13) {  // space or enter
                 chr = String.fromCharCode(keyCode);
                 _KernelInputQueue.enqueue(chr);
+            }else if (keyCode == 8){ //keyCode for backspacing
+                chr = String.fromCharCode(keyCode);
+                _KernelInputQueue.enqueue(chr);
             }
         }
     }
