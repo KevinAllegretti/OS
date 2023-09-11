@@ -8,14 +8,8 @@
 module TSOS {
 
     export class Console {
-
-        private historyBuffer: string[] = [];
-        private historyIndex: number = -1; // Initialize to -1 to indicate no history recall
-    
-        private canvasBuffer: string[] = [];
-        private visibleLines: string[] = [];
-        private maxLines: number = 10; // Maximum number of visible lines
-
+   
+     
         constructor(public currentFont = _DefaultFontFamily,
                     public currentFontSize = _DefaultFontSize,
                     public currentXPosition = 0,
@@ -27,7 +21,6 @@ module TSOS {
         public init(): void {
             this.clearScreen();
             this.resetXY();
-            //document.addEventListener("keydown", this.handleKeyDown.bind(this));
         }
 
 
@@ -41,15 +34,37 @@ module TSOS {
             this.currentYPosition = this.currentFontSize;
         }
 
-        private addToHistory(command: string): void {
-            if (command.trim() !== '') {
-                this.historyBuffer.push(command);
-                // Optionally, check and manage the size of the history buffer
-            }
+    /* with the backspace, I'm going to use substring (NOT slice) to get the last character and remove it
+    by using the buffer*/
+
+
+    public backspace(): void {
+        if (this.buffer.length > 0) {
+        // Retrieve the last character from the buffer.
+        const lastChar = this.buffer[this.buffer.length - 1];
+        
+        
+        // Remove the last character from the buffer.
+        this.buffer = this.buffer.substring(0, this.buffer.length - 1);
+        
+        
+        // Determine the width of the last character in the buffer.
+        const charWidth = _DrawingContext.measureText(this.currentFont, this.currentFontSize, lastChar);
+        
+        
+        // Adjust the current X position
+        this.currentXPosition -= charWidth;
+        
+        
+        /*Erase the last character from the display by starting from the top-left corner of the character.
+        The area cleared is exactly the size of the character */
+        _DrawingContext.clearRect(this.currentXPosition, this.currentYPosition - this.currentFontSize, charWidth, this.currentFontSize + _FontHeightMargin);
         }
+    }
+
 
         public handleInput(): void {
-
+            //Need some console logs to test where the code is in the canvas inspection code.
             console.log("TEST");
             while (_KernelInputQueue.getSize() > 0) {
                 // Get the next character from the kernel input queue.
@@ -62,23 +77,9 @@ module TSOS {
                     _OsShell.handleInput(this.buffer);
                     // ... and reset our buffer.
                     this.buffer = "";
-                    this.addToHistory(this.buffer); // Add the current command to history
-                    this.historyIndex = -1; // Reset history index
-                } else if (chr === String.fromCharCode(38)) { // Up arrow key
-                    // Handle Up arrow key (recall previous command)
-                    if (this.historyIndex < this.historyBuffer.length - 1) {
-                        this.historyIndex++;
-                        this.buffer = this.historyBuffer[this.historyIndex];
-                        // ...redraw the input area
-                    }
-                }
-                else if (chr === String.fromCharCode(40)) { // Down arrow key
-                    // Handle Down arrow key (recall next command)
-                    if (this.historyIndex >= 0) {
-                        this.historyIndex--;
-                        this.buffer = this.historyIndex === -1 ? '' : this.historyBuffer[this.historyIndex];
-                        // ...redraw the input area
-                    }
+
+                } else if (chr == String.fromCharCode(8)) {
+                    this.backspace();
                 }
                 else {
                     // This is a "normal" character, so ...
@@ -114,6 +115,11 @@ module TSOS {
 
       
         public advanceLine(): void {
+            //CITED SCROLLING from Youseff Abdelhady. 
+            /* Initially, I approached the scrolling method with upkey and downkey and a canvas buffer,
+            It semi-worked but it also was very glitchy. + I also didn't realize that the upkey
+            and down key are reserved for history input. This model for scrolling is far superior,shifting up the lines.
+            */
             this.currentXPosition = 0;
             const lineHeight = _DefaultFontSize +  // Line heght is just the height of the single line text 
             _DrawingContext.fontDescent(this.currentFont, this.currentFontSize) +
@@ -145,7 +151,7 @@ module TSOS {
         }
         /*
 
-        MIGHT use this down the line for keyboard events.... Good to have but a lot more difficult to implement in scrolling
+        MIGHT use this down the line for keyboard events....
         private handleKeyDown(event: KeyboardEvent): void {
             switch (event.keyCode) {
                 case 38: // Up arrow key
