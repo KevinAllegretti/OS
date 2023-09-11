@@ -378,6 +378,21 @@ module TSOS {
                 _StdOut.putText("Usage: prompt <string>  Please supply a string.");
             }
         }
+        
+
+        loadCommand(): void {
+            const textArea = document.getElementById("texttAreaInput") as HTMLTextAreaElement;
+            const input = textArea.value;
+            
+            //Looked up the "regex" format for hexideciaml numbers
+            const isValid = /^([0-9a-fA-F]+\s*)*$/.test(input);
+            if (isValid) {
+                console.log("Valid input");
+            } else {
+                console.log("Invalid input");
+            }
+        }
+        
 
     }
 }
