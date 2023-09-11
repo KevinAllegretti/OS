@@ -150,7 +150,24 @@ var TSOS;
         krnTrapError(msg) {
             TSOS.Control.hostLog("OS ERROR - TRAP: " + msg);
             // TODO: Display error on console, perhaps in some sort of colored screen. (Maybe blue?)
+            this.displayVaultTecError(msg);
             this.krnShutdown();
+        }
+        /* Fallout themed error message!*/
+        displayVaultTecError(errorMsg) {
+            _StdOut.clearScreen();
+            _StdOut.resetXY();
+            _StdOut.putText("==============================");
+            _StdOut.advanceLine();
+            _StdOut.putText("===== Vault-Tec OS Error =====");
+            _StdOut.advanceLine();
+            _StdOut.putText("==============================");
+            _StdOut.advanceLine();
+            _StdOut.advanceLine();
+            _StdOut.putText("ERROR: " + errorMsg);
+            _StdOut.advanceLine();
+            _StdOut.advanceLine();
+            _StdOut.putText("Please contact your nearest Vault-Tec representative.");
         }
     }
     TSOS.Kernel = Kernel;

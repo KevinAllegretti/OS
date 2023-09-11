@@ -53,7 +53,7 @@ module TSOS {
                 _GLaDOS.afterStartup();
             }
         }
-
+        
         public krnShutdown() {
             this.krnTrace("begin shutdown OS");
             // TODO: Check for running processes.  If there are some, alert and stop. Else...
@@ -67,7 +67,7 @@ module TSOS {
             this.krnTrace("end shutdown OS");
         }
 
-
+        
         public krnOnCPUClockPulse() {
             /* This gets called from the host hardware simulation every time there is a hardware clock pulse.
                This is NOT the same as a TIMER, which causes an interrupt and is handled like other interrupts.
@@ -166,11 +166,31 @@ module TSOS {
                 }
              }
         }
-
+        
         public krnTrapError(msg) {
             Control.hostLog("OS ERROR - TRAP: " + msg);
             // TODO: Display error on console, perhaps in some sort of colored screen. (Maybe blue?)
+
+            this.displayVaultTecError(msg);
             this.krnShutdown();
+        }
+        
+        /* Fallout themed error message!*/
+        private displayVaultTecError(errorMsg: String) {
+            _StdOut.clearScreen();
+            _StdOut.resetXY();
+
+            _StdOut.putText("==============================");
+            _StdOut.advanceLine();
+            _StdOut.putText("===== Vault-Tec OS Error =====");
+            _StdOut.advanceLine();
+            _StdOut.putText("==============================");
+            _StdOut.advanceLine();
+            _StdOut.advanceLine();
+            _StdOut.putText("ERROR: " + errorMsg);
+            _StdOut.advanceLine();
+            _StdOut.advanceLine();
+            _StdOut.putText("Please contact your nearest Vault-Tec representative.");
         }
     }
 }

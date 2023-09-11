@@ -33,6 +33,7 @@ module TSOS {
             var isShifted = params[1];
             _Kernel.krnTrace("Key code:" + keyCode + " shifted:" + isShifted);
             var chr = "";
+
             // Check to see if we even want to deal with the key that was pressed.
             if ((keyCode >= 65) && (keyCode <= 90)) { // letter
                 if (isShifted === true) { 
@@ -42,9 +43,39 @@ module TSOS {
                 }
                 // TODO: Check for caps-lock and handle as shifted if so.
                 _KernelInputQueue.enqueue(chr);
-            } else if (((keyCode >= 48) && (keyCode <= 57)) ||   // digits
-                        (keyCode == 32)                     ||   // space
-                        (keyCode == 13)) {                       // enter
+            } if (keyCode >= 48 && keyCode <= 57) {
+                if (isShifted) {
+                    if (keyCode === 49) {
+                        chr = "!";
+                    } else if (keyCode === 50) {
+                        chr = "@";
+                    } else if (keyCode === 51) {
+                        chr = "#";
+                    } else if (keyCode === 52) {
+                        chr = "$";
+                    } else if (keyCode === 53) {
+                        chr = "%";
+                    } else if (keyCode === 54) {
+                        chr = "^";
+                    } else if (keyCode === 55) {
+                        chr = "&";
+                    } else if (keyCode === 56) {
+                        chr = "*";
+                    } else if (keyCode === 57) {
+                        chr = "(";
+                    } else if (keyCode === 48) {
+                        chr = ")";
+                    } else {
+                        chr = String.fromCharCode(keyCode);
+                    }
+                } else {
+                    _KernelInputQueue.enqueue(chr);
+                
+                    chr = String.fromCharCode(keyCode);
+                }
+                _KernelInputQueue.enqueue(chr);
+            }
+            else if (keyCode == 32 || keyCode == 13) {  // space or enter
                 chr = String.fromCharCode(keyCode);
                 _KernelInputQueue.enqueue(chr);
             }

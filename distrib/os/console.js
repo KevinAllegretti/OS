@@ -12,6 +12,11 @@ var TSOS;
         currentXPosition;
         currentYPosition;
         buffer;
+        historyBuffer = [];
+        historyIndex = -1; // Initialize to -1 to indicate no history recall
+        canvasBuffer = [];
+        visibleLines = [];
+        maxLines = 10; // Maximum number of visible lines
         constructor(currentFont = _DefaultFontFamily, currentFontSize = _DefaultFontSize, currentXPosition = 0, currentYPosition = _DefaultFontSize, buffer = "") {
             this.currentFont = currentFont;
             this.currentFontSize = currentFontSize;
@@ -22,6 +27,7 @@ var TSOS;
         init() {
             this.clearScreen();
             this.resetXY();
+            //document.addEventListener("keydown", this.handleKeyDown.bind(this));
         }
         clearScreen() {
             _DrawingContext.clearRect(0, 0, _Canvas.width, _Canvas.height);
@@ -30,10 +36,18 @@ var TSOS;
             this.currentXPosition = 0;
             this.currentYPosition = this.currentFontSize;
         }
+        addToHistory(command) {
+            if (command.trim() !== '') {
+                this.historyBuffer.push(command);
+                // Optionally, check and manage the size of the history buffer
+            }
+        }
         handleInput() {
+            console.log("TEST");
             while (_KernelInputQueue.getSize() > 0) {
                 // Get the next character from the kernel input queue.
                 var chr = _KernelInputQueue.dequeue();
+                console.log(chr);
                 // Check to see if it's "special" (enter or ctrl-c) or "normal" (anything else that the keyboard device driver gave us).
                 if (chr === String.fromCharCode(13)) { // the Enter key
                     // The enter key marks the end of a console command, so ...
@@ -41,6 +55,24 @@ var TSOS;
                     _OsShell.handleInput(this.buffer);
                     // ... and reset our buffer.
                     this.buffer = "";
+                    this.addToHistory(this.buffer); // Add the current command to history
+                    this.historyIndex = -1; // Reset history index
+                }
+                else if (chr === String.fromCharCode(38)) { // Up arrow key
+                    // Handle Up arrow key (recall previous command)
+                    if (this.historyIndex < this.historyBuffer.length - 1) {
+                        this.historyIndex++;
+                        this.buffer = this.historyBuffer[this.historyIndex];
+                        // ...redraw the input area
+                    }
+                }
+                else if (chr === String.fromCharCode(40)) { // Down arrow key
+                    // Handle Down arrow key (recall next command)
+                    if (this.historyIndex >= 0) {
+                        this.historyIndex--;
+                        this.buffer = this.historyIndex === -1 ? '' : this.historyBuffer[this.historyIndex];
+                        // ...redraw the input area
+                    }
                 }
                 else {
                     // This is a "normal" character, so ...
@@ -48,7 +80,9 @@ var TSOS;
                     this.putText(chr);
                     // ... and add it to our buffer.
                     this.buffer += chr;
+                    console.log("TEST 4");
                 }
+                console.log("TEST 5");
                 // TODO: Add a case for Ctrl-C that would allow the user to break the current program.
             }
         }
@@ -70,6 +104,9 @@ var TSOS;
         }
         advanceLine() {
             this.currentXPosition = 0;
+            const lineHeight = _DefaultFontSize + // Line heght is just the height of the single line text 
+                _DrawingContext.fontDescent(this.currentFont, this.currentFontSize) +
+                _FontHeightMargin;
             /*
              * Font size measures from the baseline to the highest point in the font.
              * Font descent measures from the baseline to the lowest point in the font.
@@ -78,6 +115,17 @@ var TSOS;
             this.currentYPosition += _DefaultFontSize +
                 _DrawingContext.fontDescent(this.currentFont, this.currentFontSize) +
                 _FontHeightMargin;
+            if (scroll) {
+                const imageData = _DrawingContext.getImageData(0, lineHeight, _Canvas.width, _Canvas.height - lineHeight);
+                _DrawingContext.clearRect(0, 0, _Canvas.width, _Canvas.height);
+                _DrawingContext.putImageData(imageData, 0, 0);
+                _DrawingContext.clearRect(0, _Canvas.height - lineHeight, _Canvas.width, lineHeight);
+                this.currentYPosition = _Canvas.height - lineHeight;
+            }
+            else {
+                this.currentYPosition += lineHeight;
+            }
+            this.currentXPosition = 0;
             // TODO: Handle scrolling. (iProject 1)
         }
     }
