@@ -90,7 +90,12 @@ module TSOS {
                                   "prompt",
                                   "<string> - Sets the prompt.");
             this.commandList[this.commandList.length] = sc;
-
+            
+            // BSOD trigger error
+            sc = new ShellCommand(this.shellTriggerError,
+                                    "bsod",
+                                    "- Triggers a test Vault-Tec error.")
+            this.commandList[this.commandList.length] = sc;                        
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
 
@@ -268,6 +273,11 @@ module TSOS {
             _StdOut.putText(`Level: ${playerStats.level}`);
         }
 
+        //Trigger for the BSOD error.
+        public shellTriggerError(args: string[]) {
+            _Kernel.krnTrapError("Error Test.");
+        }
+        
 
         public shellVer(args: string[]) {
             _StdOut.putText(APP_NAME + " version " + APP_VERSION);
@@ -330,6 +340,8 @@ module TSOS {
                     case "prompt":
                         _StdOut.putText("Sets the prompt")
                         break;
+                    case "bsod":
+                        _StdOut.putText("Triggers a test Vault-Tec error")
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
                 }
@@ -380,8 +392,8 @@ module TSOS {
         }
         
 
-        loadCommand(): void {
-            const textArea = document.getElementById("texttAreaInput") as HTMLTextAreaElement;
+        public loadCommand(): void {
+            const textArea = document.getElementById("taProgramInput") as HTMLTextAreaElement;
             const input = textArea.value;
             
             //Looked up the "regex" format for hexideciaml numbers

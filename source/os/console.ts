@@ -111,8 +111,7 @@ module TSOS {
             }
 
 
-        }
-
+        }  
       
         public advanceLine(): void {
             //CITED SCROLLING from Youseff Abdelhady. 

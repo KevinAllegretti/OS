@@ -55,6 +55,9 @@ var TSOS;
             // prompt <string>
             sc = new TSOS.ShellCommand(this.shellPrompt, "prompt", "<string> - Sets the prompt.");
             this.commandList[this.commandList.length] = sc;
+            // BSOD trigger error
+            sc = new TSOS.ShellCommand(this.shellTriggerError, "bsod", "- Triggers a test Vault-Tec error.");
+            this.commandList[this.commandList.length] = sc;
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
             // Display the initial prompt.
@@ -217,6 +220,10 @@ var TSOS;
             _StdOut.advanceLine();
             _StdOut.putText(`Level: ${playerStats.level}`);
         }
+        //Trigger for the BSOD error.
+        shellTriggerError(args) {
+            _Kernel.krnTrapError("Error Test.");
+        }
         shellVer(args) {
             _StdOut.putText(APP_NAME + " version " + APP_VERSION);
         }
@@ -274,6 +281,8 @@ var TSOS;
                     case "prompt":
                         _StdOut.putText("Sets the prompt");
                         break;
+                    case "bsod":
+                        _StdOut.putText("Triggers a test Vault-Tec error");
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
                 }
@@ -322,6 +331,18 @@ var TSOS;
             }
             else {
                 _StdOut.putText("Usage: prompt <string>  Please supply a string.");
+            }
+        }
+        loadCommand() {
+            const textArea = document.getElementById("taProgramInput");
+            const input = textArea.value;
+            //Looked up the "regex" format for hexideciaml numbers
+            const isValid = /^([0-9a-fA-F]+\s*)*$/.test(input);
+            if (isValid) {
+                console.log("Valid input");
+            }
+            else {
+                console.log("Invalid input");
             }
         }
     }
