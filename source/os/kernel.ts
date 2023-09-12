@@ -178,6 +178,7 @@ module TSOS {
         /* Fallout themed error message!*/
         private displayVaultTecError(errorMsg: String) {
             _StdOut.clearScreen();
+
             _StdOut.resetXY();
 
             _StdOut.putText("==============================");

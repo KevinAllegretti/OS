@@ -95,7 +95,12 @@ module TSOS {
             sc = new ShellCommand(this.shellTriggerError,
                                     "bsod",
                                     "- Triggers a test Vault-Tec error.")
-            this.commandList[this.commandList.length] = sc;                        
+            this.commandList[this.commandList.length] = sc;    
+            // Load
+            sc = new ShellCommand(this.shellLoadCommand,
+                                     "load",
+                                    "- Checks to see if the user input is valid.")
+            this.commandList[this.commandList.length] = sc;                      
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
 
@@ -342,6 +347,8 @@ module TSOS {
                         break;
                     case "bsod":
                         _StdOut.putText("Triggers a test Vault-Tec error")
+                    case "load":
+                        _StdOut.putText("Checks to see if the user input is valid.")
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
                 }
@@ -392,16 +399,16 @@ module TSOS {
         }
         
 
-        public loadCommand(): void {
+        public shellLoadCommand(): void {
             const textArea = document.getElementById("taProgramInput") as HTMLTextAreaElement;
             const input = textArea.value;
-            
-            //Looked up the "regex" format for hexideciaml numbers
+            console.log("LOAD TEST");
+            //Looked up the "regex" format for hexideciaml numbers, While using the test function for a boolean value.
             const isValid = /^([0-9a-fA-F]+\s*)*$/.test(input);
             if (isValid) {
-                console.log("Valid input");
+                _StdOut.putText("Valid input");
             } else {
-                console.log("Invalid input");
+                _StdOut.putText("Invalid input");
             }
         }
         

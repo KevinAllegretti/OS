@@ -100,7 +100,7 @@ var TSOS;
             and down key are reserved for history input. This model for scrolling is far superior,shifting up the lines.
             */
             this.currentXPosition = 0;
-            const lineHeight = _DefaultFontSize + // Line heght is just the height of the single line text 
+            const lineHeight = _DefaultFontSize +
                 _DrawingContext.fontDescent(this.currentFont, this.currentFontSize) +
                 _FontHeightMargin;
             /*

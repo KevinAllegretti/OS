@@ -58,6 +58,9 @@ var TSOS;
             // BSOD trigger error
             sc = new TSOS.ShellCommand(this.shellTriggerError, "bsod", "- Triggers a test Vault-Tec error.");
             this.commandList[this.commandList.length] = sc;
+            // Load
+            sc = new TSOS.ShellCommand(this.shellLoadCommand, "load", "- Checks to see if the user input is valid.");
+            this.commandList[this.commandList.length] = sc;
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
             // Display the initial prompt.
@@ -283,6 +286,8 @@ var TSOS;
                         break;
                     case "bsod":
                         _StdOut.putText("Triggers a test Vault-Tec error");
+                    case "load":
+                        _StdOut.putText("Checks to see if the user input is valid.");
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
                 }
@@ -333,16 +338,19 @@ var TSOS;
                 _StdOut.putText("Usage: prompt <string>  Please supply a string.");
             }
         }
-        loadCommand() {
+        shellLoadCommand() {
             const textArea = document.getElementById("taProgramInput");
             const input = textArea.value;
-            //Looked up the "regex" format for hexideciaml numbers
+            console.log("LOAD TEST");
+            //Looked up the "regex" format for hexideciaml numbers, While using the test function for a boolean value.
             const isValid = /^([0-9a-fA-F]+\s*)*$/.test(input);
             if (isValid) {
-                console.log("Valid input");
+                //_StdOut.advanceLine();
+                _StdOut.putText("Valid input");
             }
             else {
-                console.log("Invalid input");
+                // _StdOut.advanceLine();
+                _StdOut.putText("Invalid input");
             }
         }
     }
