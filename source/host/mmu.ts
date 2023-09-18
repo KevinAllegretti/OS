@@ -1,8 +1,8 @@
 module TSOS {
     export class Mmu {
         private mem : Memory = null;
-    private lowOrderByte : number = null;
-    private highOrderByte : number = null;
+        private lowOrderByte : number = null;
+        private highOrderByte : number = null;
 
     constructor(id: number, name: string, Memory: Memory) {
         this.mem = Memory;
@@ -36,7 +36,7 @@ module TSOS {
         this.writeImmediate(0x0004, 0x07);
         
         //call the memory dump with the first address and last address
-        this.memoryDump(0x0000, 0x000F);
+        //this.memoryDump(0x0000, 0x000F);
     }
 
 
