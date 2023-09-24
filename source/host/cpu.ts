@@ -17,7 +17,7 @@ module TSOS {
 
         constructor(public instructionRegister: number = 0, 
                     public cyclePhase: number = 1,
-                    public mmu: Mmu = null,
+                    public ma: MemoryAccessor = null,
                     public PC: number = 0,
                     public Acc: number = 0,
                     public Xreg: number = 0,
@@ -73,7 +73,7 @@ module TSOS {
         }
 
         fetch(){
-            var temp =  this.mmu.readImmediate(this.PC);
+            var temp =  this.ma.readImmediate(this.PC);
             this.instructionRegister = temp;
             this.cyclePhase = 2;
             this.PC += 1;
@@ -89,8 +89,8 @@ module TSOS {
                 case(0xA0): //Load the Y register with a constant
                 case(0xD0): //Branch on not equals
     
-                    var temp = this.mmu.readImmediate(this.PC);
-                    this.mmu.setMdr(temp)
+                    var temp = this.ma.readImmediate(this.PC);
+                    this.ma.setMdr(temp)
                     this.PC += 1;
                     break
              
@@ -102,15 +102,15 @@ module TSOS {
                 case(0xAC): //load y register from memory
                 case(0xEC): //compare byte in memory to x register
                 case(0xEE): //Incriments byte in memory
-                    var temp = this.mmu.readImmediate(this.PC);
+                    var temp = this.ma.readImmediate(this.PC);
                     if (this.decodeStep == 1){
-                        this.mmu.setLowOrderByte(temp);
+                        this.ma.setLowOrderByte(temp);
                         this.decodeStep += 1;
                         this.cyclePhase = 2;
                     }
                     //second decode step
                     else{
-                        this.mmu.setHighOrderByte(temp);
+                        this.ma.setHighOrderByte(temp);
                         this.decodeStep = 1;
                        // this.mmu.combine();
                     }   
@@ -138,19 +138,19 @@ module TSOS {
     
             switch(this.instructionRegister){
                 case(0xA9): //Load accumulator with a constant 
-                    this.Acc = this.mmu.getMdr();
+                    this.Acc = this.ma.getMdr();
                     break
                 case(0xA2): //load X register with constant
-                    this.Xreg = this.mmu.getMdr();
+                    this.Xreg = this.ma.getMdr();
                     break
                 case(0xA0): //Load the Y register with a constant
-                    this.Yreg = this.mmu.getMdr();
+                    this.Yreg = this.ma.getMdr();
                     break
                 case(0xD0): //Branch on not equals
                     if( this.Zflag == false){
     
                         //variable for how far it will jump
-                        var distance = this.mmu.getMdr()
+                        var distance = this.ma.getMdr()
     
                         //fowards or backwards
                         if (distance < 0x80){
@@ -168,13 +168,13 @@ module TSOS {
     
                 //2 bits
                 case(0xAD): //Load accumulator with memory
-                    this.Acc = this.mmu.read();
+                    this.Acc = this.ma.read();
                     break
                 case(0x8D): //Store the accumulator with memory
-                    this.mmu.write(this.Acc);
+                    this.ma.write(this.Acc);
                     break
                 case(0x6D): //add with carry
-                    var tempRead = this.mmu.read();
+                    var tempRead = this.ma.read();
     
                     //0x80 = 128
                     if(tempRead < 0x80 && this.Acc < 0x80){
@@ -213,13 +213,13 @@ module TSOS {
                     }
                     break
                 case(0xAE): //load x register from memory
-                    this.Xreg = this.mmu.read();
+                    this.Xreg = this.ma.read();
                     break   
                 case(0xAC): //load y register from memory
-                    this.Yreg = this.mmu.read();
+                    this.Yreg = this.ma.read();
                     break   
                 case(0xEC): //compare byte in memory to x register
-                    var tempMem = this.mmu.read()
+                    var tempMem = this.ma.read()
     
                     if (tempMem == this.Xreg){
                         this.Zflag = true;
@@ -232,7 +232,7 @@ module TSOS {
                     //will need multiple execute step numbers
                     if (this.executeStep == 1){
                         //Set the accumulator to the memory
-                        this.Acc = this.mmu.read()
+                        this.Acc = this.ma.read()
                         //incriment execute step and repeat the cycle
                         this.executeStep = 2;
                         this.cyclePhase = 3;
@@ -313,7 +313,7 @@ module TSOS {
 
         //Writeback function writes what is in the accumulator
     writeBack(){
-        this.mmu.write(this.Acc);
+        this.ma.write(this.Acc);
         //change cycle to 5
         this.cyclePhase = 5;
     }
