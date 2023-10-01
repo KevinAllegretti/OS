@@ -61,6 +61,9 @@ var TSOS;
             // Load
             sc = new TSOS.ShellCommand(this.shellLoadCommand, "load", "- Checks to see if the user input is valid.");
             this.commandList[this.commandList.length] = sc;
+            //run 
+            sc = new TSOS.ShellCommand(this.shellRun, "run", "- Takes in PID and executes program");
+            this.commandList[this.commandList.length] = sc;
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
             // Display the initial prompt.
@@ -286,8 +289,13 @@ var TSOS;
                         break;
                     case "bsod":
                         _StdOut.putText("Triggers a test Vault-Tec error");
+                        break;
                     case "load":
                         _StdOut.putText("Checks to see if the user input is valid.");
+                        break;
+                    case "run":
+                        _StdOut.putText("Takes in PID and executes program.");
+                        break;
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
                 }
@@ -340,17 +348,33 @@ var TSOS;
         }
         shellLoadCommand() {
             const textArea = document.getElementById("taProgramInput");
-            const input = textArea.value;
+            const input = textArea.value.replaceAll(" ", '');
             console.log("LOAD TEST");
             //Looked up the "regex" format for hexideciaml numbers, While using the test function for a boolean value.
             const isValid = /^([0-9a-fA-F]+\s*)*$/.test(input);
             if (isValid) {
-                //_StdOut.advanceLine();
-                _StdOut.putText("Valid input");
+                let pid = _Kernel.createProcess(input);
+                _StdOut.putText("Program Loaded: PID: " + pid);
             }
             else {
-                // _StdOut.advanceLine();
                 _StdOut.putText("Invalid input");
+            }
+        }
+        shellRun(args) {
+            //check if there is a process of given ID
+            let pid = args[0];
+            if (!pid || parseInt(pid) == null) {
+                _StdOut.putText("Enter PID to run.");
+                return;
+            }
+            let process = _PCB.checkProcess(parseInt(pid));
+            //run process
+            if (process) {
+                //ask kernel to run process
+                _Kernel.runProcess(process);
+            }
+            else {
+                _StdOut.putText("Process with PID: " + pid + " does not exist");
             }
         }
     }

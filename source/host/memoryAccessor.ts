@@ -1,12 +1,11 @@
 module TSOS {
-    export class Mmu {
+    export class MemoryAccessor {
         private mem : Memory = null;
         private lowOrderByte : number = null;
         private highOrderByte : number = null;
 
-    constructor(id: number, name: string, Memory: Memory) {
-        this.mem = Memory;
-
+    constructor(id: number, name: string) {
+        this.mem = new Memory();
         //Populate the array
         this.mem.initializeArray();
 

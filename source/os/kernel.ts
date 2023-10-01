@@ -166,7 +166,32 @@ module TSOS {
                 }
              }
         }
+
+        public createProcess(input: string){
+            //Tracker for memory address
+            let tracker: number = 0;
+
+           for (let i = 0; i < input.length; i+= 2){
+                let a = input.charAt(i);
+                let b = input.charAt(i + 1);
+                let c = a + b;
+
+                _CPU.ma.writeImmediate(tracker, parseInt(c,16));
+                tracker += 1;
+           }
+
+           let pid = _PCB.addProcess(0)
+           
+            return pid;
+        }
         
+        public runProcess(process){
+            console.log("Running process", process)
+            _CPU.load(process);
+            _CPU.isExecuting = true
+
+        }
+
         public krnTrapError(msg) {
             Control.hostLog("OS ERROR - TRAP: " + msg);
             // TODO: Display error on console, perhaps in some sort of colored screen. (Maybe blue?)

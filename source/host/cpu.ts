@@ -11,13 +11,15 @@
      Operating System Concepts 8th edition by Silberschatz, Galvin, and Gagne.  ISBN 978-0-470-12872-5
      ------------ */
 
+
 module TSOS {
 
     export class Cpu {
 
+        public ma: TSOS.MemoryAccessor = new MemoryAccessor(1, "Memory Accessor")
+
         constructor(public instructionRegister: number = 0, 
                     public cyclePhase: number = 1,
-                    public ma: MemoryAccessor = null,
                     public PC: number = 0,
                     public Acc: number = 0,
                     public Xreg: number = 0,
@@ -26,7 +28,11 @@ module TSOS {
                     public decodeStep: number = 1,
                     public executeStep: number = 1,
                     public carryFlag: number = 0,
-                    public isExecuting: boolean = false) {
+                    public isExecuting: boolean = false,
+                    public pid: number = null,
+                    ) {
+
+                    
 
         }
 
@@ -45,9 +51,43 @@ module TSOS {
             this.isExecuting = false;
         }
 
+        public load(process){
+            this.instructionRegister = process.instructionRegister;
+            this.cyclePhase = process.cyclePhase
+            this.PC = process.PC
+            this.Acc = process.Acc;
+            this.Xreg = process.Xreg;
+            this.Yreg = process.Yreg;
+            this.Zflag = process.Zflag;
+            this.decodeStep = process.decodeStep;
+            this.executeStep = process.executeStep;
+            this.carryFlag = process.carryFlag;
+            this.isExecuting = process.isExecuting;
+        }
+
+        public log(message: string){
+            _StdOut.putText(message);
+        }
+
+	    public hexlog(arrayValue, numLength = 2){
+			var hexNum : String = arrayValue.toString(16).toUpperCase();
+
+			while(numLength > hexNum.length){
+				hexNum = '0' + hexNum;
+			}
+			return hexNum;
+			//console.log(arrayValue.toString(16).substring(0));
+		}		
+
+
          //initialize cpuClockCount to zero
         cpuClockCount: number = 0;
         public cycle(): void {
+            console.log("CPU Cycling", "PC: "+this.hexlog(this.PC), "ACC: " + this.hexlog(this.Acc), "IR: "+this.hexlog(this.instructionRegister), 
+            "YReg: " + this.hexlog(this.Yreg),
+            "XReg: " + this.hexlog(this.Xreg),
+
+            )
             _Kernel.krnTrace('CPU cycle');
             this.cpuClockCount += 1;
             switch(this.cyclePhase){
@@ -65,8 +105,7 @@ module TSOS {
                     break
                 case(5):
                     this.interruptCheck();
-                    break         
-                
+                    break                         
             }
             // TODO: Accumulate CPU usage and profiling statistics here.
             // Do the real work here. Be sure to set this.isExecuting appropriately.
@@ -104,12 +143,15 @@ module TSOS {
                 case(0xEE): //Incriments byte in memory
                     var temp = this.ma.readImmediate(this.PC);
                     if (this.decodeStep == 1){
+                        console.log('setting low order byte ', temp)
                         this.ma.setLowOrderByte(temp);
                         this.decodeStep += 1;
                         this.cyclePhase = 2;
                     }
                     //second decode step
                     else{
+                        console.log('setting high order byte', temp)
+
                         this.ma.setHighOrderByte(temp);
                         this.decodeStep = 1;
                        // this.mmu.combine();
@@ -249,9 +291,13 @@ module TSOS {
                 //NO bit decode
                 //Add break statement to all cases
                 case(0x00): //break Need to tell cpu to run the stop function.
-                case(0x8A): //Load accumulator from x register
+                    this.isExecuting = false;
+                    break;
+               /* case(0x8A): //Load accumulator from x register
                     this.Acc = this.Xreg;
                     break
+                */
+               /*
                 case(0x98): //Load accumulator from y register
                     this.Acc = this.Yreg;
                     break
@@ -261,49 +307,50 @@ module TSOS {
                 case(0xA8): //Load y register from accumulator
                     this.Yreg = this.Acc;
                     break
+                */
                 case(0xEA): //No operation
                     break
-                /*
+                
                 case(0xFF): //System Call
                     
                 //If the x register is 1, output the y register
-                    if (this.Xregister == 1){
-                        this.hexlog(this.Yregister)
+                    if (this.Xreg == 1){
+                        this.log(this.hexlog(this.Yreg).toString())
     
                     }
-                    else if (this.Xregister == 2){
-                        var CurrYreg = this.Yregister;
+                    else if (this.Xreg == 2){
+                        var CurrYreg = this.Yreg;
                         //read current y register if not 0, then print out with ascii conversion. If it is 0 then stop.
-                        while(this.mmu.readImmediate(CurrYreg) != 0){
-                            this.log(this.ascii.toAscii(this.mmu.readImmediate(CurrYreg)))
+                        while(this.ma.readImmediate(CurrYreg) != 0){
+                            this.log(this.toAscii(this.ma.readImmediate(CurrYreg)))
                             CurrYreg += 1;
                         }
                     }
-                    else if(this.Xregister == 3){
+                    else if(this.Xreg == 3){
                         //Draw out memory location..
                         //hexlog to concatenate
-                        var LOB = this.hexlog(this.mmu.readImmediate(this.programCounter))
-                        this.programCounter += 1;
+                        var LOB = this.hexlog(this.ma.readImmediate(this.PC))
+                        this.PC += 1;
     
                         //hob always after lob
-                        var HOB = this.hexlog(this.mmu.readImmediate(this.programCounter))
+                        var HOB = this.hexlog(this.ma.readImmediate(this.PC))
                         //incriment program couunter
-                        this.programCounter += 1;
+                        this.PC += 1;
     
                         //combine HOB and LOB with parseInt
                         var combineBytes = this.hexlog(HOB) + '' + this.hexlog(LOB);
                         var combineTwo = parseInt(combineBytes);
     
                         //Print out the HOB and LOB with ascii conversion while the location is not 0
-                        while(this.mmu.readImmediate(combineTwo) != 0){
+                        while(this.ma.readImmediate(combineTwo) != 0){
     
-                            this.log(this.ascii.toAscii(this.mmu.readImmediate(combineTwo)))
+                            this.log(this.toAscii(this.ma.readImmediate(combineTwo)))
                             combineTwo += 1;
                         }
 
     
                     }
-                    */
+                    
                     break
     
             }
@@ -332,6 +379,156 @@ module TSOS {
 
 
         
+
+
+    //List of Ascii items cooresponding to bytes via their index
+    library = [ 
+        "Null",
+        "Start of Heading",
+        "Start of Text",
+        "End of Text",
+        "End of Transmission",
+        "Enquiry",
+        "Acknowledgment",
+        "Bell",
+        "Backspace",
+        "Horizontal Tab",
+        "Line Feed",
+        "Vertical Tab",
+        "Form Feed",
+        "Carriage Return",
+        "Shift Out",
+        "Shift In",
+        "Data Link Escape",
+        "Device Control 1",
+        "Device Control 2",
+        "Device Control 3",
+        "Device Control 4",
+        "Negative ACK",
+        "Synchronous idle",
+        "End of Trans. Block",
+        "Cancel",
+        "End of Medium",
+        "Substitute",
+        "Escape",
+        "File Separator",
+        "Group Separator",
+        "Record Separator",
+        "Unit Separator",
+        "Space",
+        "!",
+        "'",
+        "#",
+        "$",
+        "%",
+        "&",
+        "'",
+        "(",
+        ")",
+        "*",
+        "+",
+        ",",
+        "-",
+        ".",
+        "/",
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        ":",
+        ";",
+        "<",
+        "=",
+        ">",
+        "?",
+        "@",
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G",
+        "H",
+        "I",
+        "J",
+        "K",
+        "L",
+        "M",
+        "N",
+        "O",
+        "P",
+        "Q",
+        "R",
+        "S",
+        "T",
+        "U",
+        "V",
+        "W",
+        "X",
+        "Y",
+        "Z",
+        "[",
+        "'\'",
+        "]",
+        "^",
+        "_",
+        "`",
+        "a",
+        "b",
+        "c",
+        "d",
+        "e",
+        "f",
+        "g",
+        "h",
+        "i",
+        "j",
+        "k",
+        "l",
+        "m",
+        "n",
+        "o",
+        "p",
+        "q",
+        "r",
+        "s",
+        "t",
+        "u",
+        "v",
+        "w",
+        "x",
+        "y",
+        "z",
+        "{",
+        "|",
+        "}",
+        "~",
+        "Del",
+    ];
+    
+    //Converting from Byte to Ascii
+    //List should accept the byte which will be the index of the ascii and return the ascii
+    toAscii(tempByte: number){
+
+        return this.library[tempByte]
+
+    }
+
+    //Converting from Ascii to Byte
+    //indexOf will search the list for the item and give the index of said item which will be the byte
+    toByte(tempAscii: string){
+
+        return this.library.indexOf(tempAscii)
+
+    }
+
 
 }
 
