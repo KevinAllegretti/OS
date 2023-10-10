@@ -16,6 +16,7 @@
    <script type="text/javascript" src="distrib/host/memory.js"></script>
    <script type="text/javascript" src="distrib/host/memoryAccessor.js"></script>
 
+
    <script type="text/javascript" src="distrib/host/devices.js"></script>
    <script type="text/javascript" src="distrib/host/cpu.js"></script>
 
@@ -31,11 +32,12 @@
    <script type="text/javascript" src="distrib/os/shellCommand.js"></script>
    <script type="text/javascript" src="distrib/os/userCommand.js"></script>
    <script type="text/javascript" src="distrib/os/kernel.js"></script>
+   <script type="text/javascript" src="distrib/os/pcb.js"></script>
 
    <!-- Other Routines -->
    <script type="text/javascript" src="distrib/utils.js"></script>
    <!-- Uncomment the line below to enable GLaDOS testing. -->
-   <script type="text/javascript" src="https://alanclasses.github.io/TSOS/test/glados-ip0.js"></script>
+   <script type="text/javascript" src="https://alanclasses.github.io/TSOS/test/glados-ip2.js"></script>
    
 </head>
 
@@ -133,6 +135,46 @@
          ></textarea>
       </label>
    </div>
+</div>
+
+<div id="divMemoryTable" style="float:left; margin-left:20px; max-height:300px; overflow-y:auto;"> 
+   <h5>Memory</h5>
+   <table id="memorytable">
+       <tbody>
+           <tr>
+               <td></td>
+               <td></td>
+           </tr>
+           <tr>
+               <td></td>
+               <td></td>
+           </tr>
+       </tbody>
+   </table>
+</div>
+
+
+
+<div id="divProcessTable" style="margin-left:50px;">
+   <table id="processTable">
+      <caption>Processes</caption>
+      <thead>
+         <tr>
+            <th>PID</th>
+            <th>PC</th>
+            <th>IR</th>
+            <th>ACC</th>
+            <th>X</th>
+            <th>Y</th>
+            <th>Z</th>
+            <th>Priority</th>
+            <th>State</th>
+            <th>Location</th>
+         </tr>
+      </thead>
+      <tbody>
+      </tbody>
+   </table>
 </div>
 
 

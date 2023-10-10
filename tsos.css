@@ -1,5 +1,5 @@
 /* TSOS.css */
-
+/*
 body {
   background: #909193 url(distrib/images/linen.png) repeat;
   font-family: Helvetica, Verdana, Arial, sans-serif;
@@ -45,4 +45,112 @@ h3 {
   font-family: Arial, Helvetica, sans-serif;
   font-size: 8pt;
   text-align: center;
+}
+
+#memorytable {
+  width: 200px;
+  height: 100px;
+  float: right;
+}
+
+
+#memorytable th, #memorytable td {
+  border: 1px solid #666;
+  padding: 8px;
+  text-align: left;
+}
+
+#memorytable tr:hover {
+  background-color: #ddd;
+}
+*/
+
+/*#divMemoryTable h5*/ 
+  /*text-align: center;*/
+  /*margin-bottom: 10px;*/
+/*}*/
+
+/*Process Table */
+/*
+#processTable {
+    width: 100px;
+    height: 100px;
+    float: inline-end;
+  }
+
+#processTable th, #processTable td {
+  border: 1px solid #888;      
+  padding: 8px;                  
+  text-align: left;              
+}
+
+#divprocessTable h5{
+  background-color: #eee;    
+  text-align: center;
+  margin-bottom: 10px;  
+}
+*/
+body {
+  background: #332f2c;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 12pt;
+  font-weight: normal;
+  font-style: normal;
+  color: #34C84A;
+}
+
+h1, h2, h3, h5 {
+  color: #50E070;
+}
+
+#display {
+  background-color: #d1d1d1;
+  color: #34C84A;
+  border: 2px solid #50E070;
+  cursor: default;
+}
+
+.normal_button {
+  width: 100px;
+  background-color: #50E070;
+  border: 1px solid #34C84A;
+  color: #1D1D1D;
+}
+
+.normal_button:hover {
+  background-color: #34C84A;
+  color: #1D1D1D;
+}
+
+.footerText {
+  color: #50E070;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 8pt;
+  text-align: center;
+}
+
+#memorytable, #processTable {
+  border-collapse: collapse;
+}
+
+#memorytable th, #memorytable td, #processTable th, #processTable td {
+  border: 1px solid #50E070;
+  padding: 8px;
+  background-color: #1D1D1D;
+  color: #34C84A;
+}
+
+#memorytable tr:hover, #processTable tr:hover {
+  background-color: #2B2B2B;
+}
+
+/* For the section headers */
+h5 {
+  border-bottom: 2px solid #50E070;
+  padding: 5px;
+}
+
+/* Pip-Boy green for buttons and focus */
+input:focus, textarea:focus {
+  outline-color: #50E070;
 }
