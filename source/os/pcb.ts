@@ -42,5 +42,34 @@ module TSOS {
         }
 
        }
+
+
+public renderProcessTable() {
+    console.log("Rendering Process Table");
+    console.log(this.processMap);
+    const tableBody = document.getElementById('processTable').getElementsByTagName('tbody')[0];
+    tableBody.innerHTML = ''; // Clear any existing rows
+    this.processMap.forEach((process, pid) => {
+    let row = tableBody.insertRow();
+    let pidCell = row.insertCell(0);
+    let pcCell = row.insertCell(1);
+    let irCell = row.insertCell(2);
+    let accCell = row.insertCell(3);
+    let xCell = row.insertCell(4);
+    let yCell = row.insertCell(5);
+    let zCell = row.insertCell(6);
+    
+    
+    pidCell.textContent = process.pid.toString();
+    pcCell.textContent = process.PC.toString();
+    irCell.textContent = process.instructionRegister.toString();
+    accCell.textContent = process.Acc.toString();
+    xCell.textContent = process.Xreg.toString();
+    yCell.textContent = process.Yreg.toString();
+    zCell.textContent = process.Zflag ? "1" : "0";
+    });
+    }
+    
+    
     }
 }
