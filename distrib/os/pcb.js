@@ -34,6 +34,40 @@ var TSOS;
                 return null;
             }
         }
+        saveProcess(pid, data) {
+            this.processMap.set(pid, data);
+        }
+        hexlog(arrayValue, numLength = 2) {
+            var hexNum = arrayValue.toString(16).toUpperCase();
+            while (numLength > hexNum.length) {
+                hexNum = '0' + hexNum;
+            }
+            return hexNum;
+            //console.log(arrayValue.toString(16).substring(0));
+        }
+        renderProcessTable() {
+            //console.log("Rendering Process Table");
+            //console.log(this.processMap);
+            const tableBody = document.getElementById('processTable').getElementsByTagName('tbody')[0];
+            tableBody.innerHTML = ''; // Clear any existing rows
+            this.processMap.forEach((process, pid) => {
+                let row = tableBody.insertRow();
+                let pidCell = row.insertCell(0);
+                let pcCell = row.insertCell(1);
+                let irCell = row.insertCell(2);
+                let accCell = row.insertCell(3);
+                let xCell = row.insertCell(4);
+                let yCell = row.insertCell(5);
+                let zCell = row.insertCell(6);
+                pidCell.textContent = process.pid.toString();
+                pcCell.textContent = this.hexlog(process.PC);
+                irCell.textContent = this.hexlog(process.instructionRegister);
+                accCell.textContent = this.hexlog(process.Acc);
+                xCell.textContent = this.hexlog(process.Xreg);
+                yCell.textContent = this.hexlog(process.Yreg);
+                zCell.textContent = process.Zflag ? "1" : "0";
+            });
+        }
     }
     TSOS.Pcb = Pcb;
 })(TSOS || (TSOS = {}));

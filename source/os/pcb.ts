@@ -43,10 +43,23 @@ module TSOS {
 
        }
 
+       public saveProcess(pid:number,data){
+        this.processMap.set(pid,data);
+       }
 
+       public hexlog(arrayValue, numLength = 2){
+        var hexNum : string = arrayValue.toString(16).toUpperCase();
+
+        while(numLength > hexNum.length){
+            hexNum = '0' + hexNum;
+        }
+        return hexNum;
+        //console.log(arrayValue.toString(16).substring(0));
+    }		
+    
 public renderProcessTable() {
-    console.log("Rendering Process Table");
-    console.log(this.processMap);
+    //console.log("Rendering Process Table");
+    //console.log(this.processMap);
     const tableBody = document.getElementById('processTable').getElementsByTagName('tbody')[0];
     tableBody.innerHTML = ''; // Clear any existing rows
     this.processMap.forEach((process, pid) => {
@@ -61,11 +74,11 @@ public renderProcessTable() {
     
     
     pidCell.textContent = process.pid.toString();
-    pcCell.textContent = process.PC.toString();
-    irCell.textContent = process.instructionRegister.toString();
-    accCell.textContent = process.Acc.toString();
-    xCell.textContent = process.Xreg.toString();
-    yCell.textContent = process.Yreg.toString();
+    pcCell.textContent = this.hexlog(process.PC);
+    irCell.textContent = this.hexlog(process.instructionRegister);
+    accCell.textContent = this.hexlog(process.Acc);
+    xCell.textContent = this.hexlog(process.Xreg);
+    yCell.textContent = this.hexlog(process.Yreg);
     zCell.textContent = process.Zflag ? "1" : "0";
     });
     }

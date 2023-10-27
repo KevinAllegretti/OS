@@ -77,7 +77,7 @@ var TSOS;
                 // TODO: Add a case for Ctrl-C that would allow the user to break the current program.
             }
         }
-        putText(text) {
+        putText(input) {
             /*  My first inclination here was to write two functions: putChar() and putString().
                 Then I remembered that JavaScript is (sadly) untyped and it won't differentiate
                 between the two. (Although TypeScript would. But we're compiling to JavaScipt anyway.)
@@ -85,12 +85,18 @@ var TSOS;
                 do the same thing, thereby encouraging confusion and decreasing readability, I
                 decided to write one function and use the term "text" to connote string or char.
             */
-            if (text !== "") {
-                // Draw the text at the current X and Y coordinates.
-                _DrawingContext.drawText(this.currentFont, this.currentFontSize, this.currentXPosition, this.currentYPosition, text);
-                // Move the current X position.
-                var offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, text);
-                this.currentXPosition = this.currentXPosition + offset;
+            if (input !== "") {
+                for (let i = 0; i < input.length; i++) {
+                    let text = input.charAt(i);
+                    // Draw the text at the current X and Y coordinates.
+                    if (this.currentXPosition > 400) {
+                        this.advanceLine();
+                    }
+                    _DrawingContext.drawText(this.currentFont, this.currentFontSize, this.currentXPosition, this.currentYPosition, text);
+                    // Move the current X position.
+                    var offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, text);
+                    this.currentXPosition = this.currentXPosition + offset;
+                }
             }
         }
         advanceLine() {

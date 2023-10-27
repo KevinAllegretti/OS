@@ -348,11 +348,12 @@ var TSOS;
         }
         shellLoadCommand() {
             const textArea = document.getElementById("taProgramInput");
-            const input = textArea.value.replaceAll(" ", '');
+            const input = textArea.value.replaceAll(" ", '').replaceAll('\n', '').trim();
             console.log("LOAD TEST");
             //Looked up the "regex" format for hexideciaml numbers, While using the test function for a boolean value.
             const isValid = /^([0-9a-fA-F]+\s*)*$/.test(input);
             if (isValid) {
+                console.log(input);
                 let pid = _Kernel.createProcess(input);
                 _StdOut.putText("Program Loaded: PID: " + pid);
             }

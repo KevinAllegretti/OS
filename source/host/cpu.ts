@@ -52,6 +52,7 @@ module TSOS {
         }
 
         public load(process){
+            this.pid = process.pid;
             this.instructionRegister = process.instructionRegister;
             this.cyclePhase = process.cyclePhase
             this.PC = process.PC
@@ -64,8 +65,23 @@ module TSOS {
             this.carryFlag = process.carryFlag;
             this.isExecuting = process.isExecuting;
         }
+        public save(){
+            let process = _PCB.checkProcess(this.pid);
+            process.instructionRegister = this.instructionRegister;
+            process.cyclePhase = this.cyclePhase;
+            process.PC = this.PC;
+            process.Acc = this.Acc;
+            process.Xreg = this.Xreg;
+            process.Yreg = this.Yreg;
+            process.Zflag = this.Zflag;
+            process.decodeStep = this.decodeStep;
+            process.executeStep = this.executeStep;
+            process.carryFlag = this.carryFlag;
+            process.isExecuting = this.isExecuting;
+        }
 
         public log(message: string){
+            console.log(message);
             _StdOut.putText(message);
         }
 
@@ -107,6 +123,8 @@ module TSOS {
                     this.interruptCheck();
                     break                         
             }
+            this.save();
+            _PCB.renderProcessTable();
             // TODO: Accumulate CPU usage and profiling statistics here.
             // Do the real work here. Be sure to set this.isExecuting appropriately.
         }
@@ -154,7 +172,7 @@ module TSOS {
 
                         this.ma.setHighOrderByte(temp);
                         this.decodeStep = 1;
-                       // this.mmu.combine();
+                        this.ma.combine();
                     }   
                     this.PC += 1;
                     break
@@ -197,6 +215,9 @@ module TSOS {
                         //fowards or backwards
                         if (distance < 0x80){
                             this.PC += distance
+                            if (this.PC > 0xFF){
+                                this.PC = this.PC - 0xFF;
+                            }
                         }
                         else
                         {   
@@ -316,7 +337,6 @@ module TSOS {
                 //If the x register is 1, output the y register
                     if (this.Xreg == 1){
                         this.log(this.hexlog(this.Yreg).toString())
-    
                     }
                     else if (this.Xreg == 2){
                         var CurrYreg = this.Yreg;
@@ -326,30 +346,7 @@ module TSOS {
                             CurrYreg += 1;
                         }
                     }
-                    else if(this.Xreg == 3){
-                        //Draw out memory location..
-                        //hexlog to concatenate
-                        var LOB = this.hexlog(this.ma.readImmediate(this.PC))
-                        this.PC += 1;
-    
-                        //hob always after lob
-                        var HOB = this.hexlog(this.ma.readImmediate(this.PC))
-                        //incriment program couunter
-                        this.PC += 1;
-    
-                        //combine HOB and LOB with parseInt
-                        var combineBytes = this.hexlog(HOB) + '' + this.hexlog(LOB);
-                        var combineTwo = parseInt(combineBytes);
-    
-                        //Print out the HOB and LOB with ascii conversion while the location is not 0
-                        while(this.ma.readImmediate(combineTwo) != 0){
-    
-                            this.log(this.toAscii(this.ma.readImmediate(combineTwo)))
-                            combineTwo += 1;
-                        }
-
-    
-                    }
+                    
                     
                     break
     
@@ -385,7 +382,7 @@ module TSOS {
     library = [ 
         "Null",
         "Start of Heading",
-        "Start of Text",
+        "SoT",
         "End of Text",
         "End of Transmission",
         "Enquiry",
@@ -415,7 +412,7 @@ module TSOS {
         "Group Separator",
         "Record Separator",
         "Unit Separator",
-        "Space",
+        " ",
         "!",
         "'",
         "#",
@@ -518,14 +515,6 @@ module TSOS {
     toAscii(tempByte: number){
 
         return this.library[tempByte]
-
-    }
-
-    //Converting from Ascii to Byte
-    //indexOf will search the list for the item and give the index of said item which will be the byte
-    toByte(tempAscii: string){
-
-        return this.library.indexOf(tempAscii)
 
     }
 

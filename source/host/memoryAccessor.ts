@@ -1,16 +1,14 @@
 module TSOS {
     export class MemoryAccessor {
-        private mem : Memory = null;
         private lowOrderByte : number = null;
         private highOrderByte : number = null;
 
     constructor(id: number, name: string) {
-        this.mem = new Memory();
         //Populate the array
-        this.mem.initializeArray();
+        _Memory.initializeArray();
 
         //Write out all of the instructions passed into write immediate to load into memory
-        /*this.writeImmediate(0x0000, 0xA9);
+        this.writeImmediate(0x0000, 0xA9);
         this.writeImmediate(0x0001, 0x0D);
         this.writeImmediate(0x0002, 0xA9);
         this.writeImmediate(0x0003, 0x1D);
@@ -26,13 +24,13 @@ module TSOS {
         this.writeImmediate(0x000D, 0x00);
         this.writeImmediate(0x000E, 0x00);
         this.writeImmediate(0x000F, 0x00);
-        */
+        
 
-        this.writeImmediate(0x0000, 0xAD);
-        this.writeImmediate(0x0001, 0x04);
-        this.writeImmediate(0x0002, 0x00);
-        this.writeImmediate(0x0003, 0x00);
-        this.writeImmediate(0x0004, 0x07);
+        // this.writeImmediate(0x0000, 0xAD);
+        // this.writeImmediate(0x0001, 0x04);
+        // this.writeImmediate(0x0002, 0x00);
+        // this.writeImmediate(0x0003, 0x00);
+        // this.writeImmediate(0x0004, 0x07);
         
         //call the memory dump with the first address and last address
         //this.memoryDump(0x0000, 0x000F);
@@ -52,57 +50,68 @@ module TSOS {
     }
 
 
-    /*
+    
     //Create a funciton to combine the two order bytes
     combine(){
         //Display the bytes and store in a variable so it can be passed to memory.
         var Result = this.hexlog(this.highOrderByte) + '' + this.hexlog(this.lowOrderByte);
+        console.log("COMBINE RESULT: ", this.hexlog(Result))
         //Convert Result to a number from string, pass through to memory.
-        this.mem.setMar(parseInt(Result, 16));    
+        _Memory.setMar(parseInt(Result, 16));    
     }
-    */
+    
 
     //read function to return the mdr
     read(){
-        this.mem.read();
-        return this.mem.getMdr();
+        _Memory.read();
+        return _Memory.getMdr();
     }
 
     
     write(newData: number){
 
         //Set mdr to the new data
-        this.mem.setMdr(newData);
+        console.log("WRITING", this.hexlog(newData), 'TO ', this.hexlog(_Memory.getMar()))
+        _Memory.setMdr(newData);
 
         //implementing new data into memory
-        this.mem.write();
+        _Memory.write();
 
     }
 
     setMdr(Data: number){
-        this.mem.setMdr(Data); 
+        _Memory.setMdr(Data); 
     }
 
     getMdr(){
-        return this.mem.getMdr();
+        return _Memory.getMdr();
     }
     //Create write immediate funciton to in order to load instruciton sets or "static" programs
     writeImmediate(Address: number, Data: number){
         //Pass the address to Mar
-        this.mem.setMar(Address);
+        _Memory.setMar(Address);
         //Pass the data to Mdr
-        this.mem.setMdr(Data);
+        _Memory.setMdr(Data);
         //Write the instruciton into memory.
-        this.mem.write();
+        _Memory.write();
     }
 
     readImmediate(Address: number){
-        this.mem.setMar(Address);
-        this.mem.read();
+        _Memory.setMar(Address);
+        _Memory.read();
 
         //return the data found at address
-        return this.mem.getMdr();
+        return _Memory.getMdr();
     }
+    hexlog(arrayValue, numLength = 2) {
+        var hexNum = arrayValue.toString(16).toUpperCase();
+        while (numLength > hexNum.length) {
+            hexNum = '0' + hexNum;
+        }
+        return hexNum;
+        //console.log(arrayValue.toString(16).substring(0));
+    }
+
 
 
     /*

@@ -54,6 +54,7 @@ var TSOS;
             this.isExecuting = false;
         }
         load(process) {
+            this.pid = process.pid;
             this.instructionRegister = process.instructionRegister;
             this.cyclePhase = process.cyclePhase;
             this.PC = process.PC;
@@ -66,7 +67,22 @@ var TSOS;
             this.carryFlag = process.carryFlag;
             this.isExecuting = process.isExecuting;
         }
+        save() {
+            let process = _PCB.checkProcess(this.pid);
+            process.instructionRegister = this.instructionRegister;
+            process.cyclePhase = this.cyclePhase;
+            process.PC = this.PC;
+            process.Acc = this.Acc;
+            process.Xreg = this.Xreg;
+            process.Yreg = this.Yreg;
+            process.Zflag = this.Zflag;
+            process.decodeStep = this.decodeStep;
+            process.executeStep = this.executeStep;
+            process.carryFlag = this.carryFlag;
+            process.isExecuting = this.isExecuting;
+        }
         log(message) {
+            console.log(message);
             _StdOut.putText(message);
         }
         hexlog(arrayValue, numLength = 2) {
@@ -100,6 +116,8 @@ var TSOS;
                     this.interruptCheck();
                     break;
             }
+            this.save();
+            _PCB.renderProcessTable();
             // TODO: Accumulate CPU usage and profiling statistics here.
             // Do the real work here. Be sure to set this.isExecuting appropriately.
         }
@@ -141,7 +159,7 @@ var TSOS;
                         console.log('setting high order byte', temp);
                         this.ma.setHighOrderByte(temp);
                         this.decodeStep = 1;
-                        // this.mmu.combine();
+                        this.ma.combine();
                     }
                     this.PC += 1;
                     break;
@@ -175,6 +193,9 @@ var TSOS;
                         //fowards or backwards
                         if (distance < 0x80) {
                             this.PC += distance;
+                            if (this.PC > 0xFF) {
+                                this.PC = this.PC - 0xFF;
+                            }
                         }
                         else {
                             //represent as a negative number
@@ -292,24 +313,6 @@ var TSOS;
                             CurrYreg += 1;
                         }
                     }
-                    else if (this.Xreg == 3) {
-                        //Draw out memory location..
-                        //hexlog to concatenate
-                        var LOB = this.hexlog(this.ma.readImmediate(this.PC));
-                        this.PC += 1;
-                        //hob always after lob
-                        var HOB = this.hexlog(this.ma.readImmediate(this.PC));
-                        //incriment program couunter
-                        this.PC += 1;
-                        //combine HOB and LOB with parseInt
-                        var combineBytes = this.hexlog(HOB) + '' + this.hexlog(LOB);
-                        var combineTwo = parseInt(combineBytes);
-                        //Print out the HOB and LOB with ascii conversion while the location is not 0
-                        while (this.ma.readImmediate(combineTwo) != 0) {
-                            this.log(this.toAscii(this.ma.readImmediate(combineTwo)));
-                            combineTwo += 1;
-                        }
-                    }
                     break;
             }
         }
@@ -333,7 +336,7 @@ var TSOS;
         library = [
             "Null",
             "Start of Heading",
-            "Start of Text",
+            "SoT",
             "End of Text",
             "End of Transmission",
             "Enquiry",
@@ -363,7 +366,7 @@ var TSOS;
             "Group Separator",
             "Record Separator",
             "Unit Separator",
-            "Space",
+            " ",
             "!",
             "'",
             "#",
@@ -464,11 +467,6 @@ var TSOS;
         //List should accept the byte which will be the index of the ascii and return the ascii
         toAscii(tempByte) {
             return this.library[tempByte];
-        }
-        //Converting from Ascii to Byte
-        //indexOf will search the list for the item and give the index of said item which will be the byte
-        toByte(tempAscii) {
-            return this.library.indexOf(tempAscii);
         }
     }
     TSOS.Cpu = Cpu;

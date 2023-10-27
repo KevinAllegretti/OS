@@ -75,6 +75,8 @@ var TSOS;
             else { // If there are no interrupts and there is nothing being executed then just be idle.
                 this.krnTrace("Idle");
             }
+            _PCB.renderProcessTable();
+            _Memory.displayMemory();
         }
         //
         // Interrupt Handling
@@ -154,6 +156,7 @@ var TSOS;
                 let a = input.charAt(i);
                 let b = input.charAt(i + 1);
                 let c = a + b;
+                console.log('combining ', a, '+', b, '=', parseInt(c, 16));
                 _CPU.ma.writeImmediate(tracker, parseInt(c, 16));
                 tracker += 1;
             }
