@@ -92,12 +92,13 @@ module TSOS {
     }
 
        //read memory location in the MAR and update the MDR
-       read(){
+    read(){
         this.mdr = this.memoryArray[this.mar];
     }
     //write the contents of the MDR to memory at the location indiciated by the MAR
     write(){
         this.memoryArray[this.mar] = this.mdr;
+        this.displayMemory()
     }
 
 

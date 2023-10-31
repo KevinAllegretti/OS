@@ -13,6 +13,7 @@ module TSOS {
         //
         // OS Startup and Shutdown Routines
         //
+
         public krnBootstrap() {      // Page 8. {
             Control.hostLog("bootstrap", "host");  // Use hostLog because we ALWAYS want this, even if _Trace is off.
 
@@ -52,6 +53,8 @@ module TSOS {
             if (_GLaDOS) {
                 _GLaDOS.afterStartup();
             }
+
+            
         }
         
         public krnShutdown() {
@@ -81,8 +84,30 @@ module TSOS {
                 // TODO (maybe): Implement a priority queue based on the IRQ number/id to enforce interrupt priority.
                 var interrupt = _KernelInterruptQueue.dequeue();
                 this.krnInterruptHandler(interrupt.irq, interrupt.params);
-            } else if (_CPU.isExecuting) { // If there are no interrupts then run one CPU cycle if there is anything being processed.
+            } else if (_CPU.isExecuting || _PCB.readyQueue.length > 0) { // If there are no interrupts then run one CPU cycle if there is anything being processed.
+                if (_CPU.cycleTracker%6 == 0){
+                    
+
+                    if (_CPU.pid != null){
+                        _CPU.save();
+
+                        var oldProcess = _PCB.checkProcess(_CPU.pid);
+                        if (oldProcess.isExecuting == true){
+                            _PCB.readyQueue.push(oldProcess);
+                        }
+
+                    }
+
+                    var newProcess = _PCB.readyQueue[0];
+                    _PCB.readyQueue.shift();
+                    this.runProcess(newProcess);
+
+
+                }
+                
                 _CPU.cycle();
+
+
             } else {                       // If there are no interrupts and there is nothing being executed then just be idle.
                 this.krnTrace("Idle");
             }
@@ -177,20 +202,22 @@ module TSOS {
                 let a = input.charAt(i);
                 let b = input.charAt(i + 1);
                 let c = a + b;
-                console.log('combining ',a,'+',b, '=',parseInt(c,16))
-                _CPU.ma.writeImmediate(tracker, parseInt(c,16));
+                //console.log('combining ',a,'+',b, '=',parseInt(c,16))
+                //console.log(_MemoryManager.nextProcessByte, tracker)
+                _CPU.ma.writeImmediate(_MemoryManager.nextProcessByte + tracker, parseInt(c,16));
+                //console.log("writing to ",_MemoryManager.nextProcessByte + tracker)
                 tracker += 1;
            }
 
-           let pid = _PCB.addProcess(0)
-           
+           let pid = _PCB.addProcess(_MemoryManager.nextProcessByte,_MemoryManager.nextProcessByte+tracker)
+            _MemoryManager.nextProcessByte = _MemoryManager.nextProcessByte + tracker + 256
             return pid;
         }
         
         public runProcess(process){
             console.log("Running process", process)
+            process.isExecuting = true;
             _CPU.load(process);
-            _CPU.isExecuting = true
 
         }
 

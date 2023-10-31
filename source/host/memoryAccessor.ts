@@ -1,39 +1,18 @@
 module TSOS {
     export class MemoryAccessor {
-        private lowOrderByte : number = null;
-        private highOrderByte : number = null;
+    private lowOrderByte : number = null;
+    private highOrderByte : number = null;
+    public startLocation:number = 0;
+    public endLocation:number = 0;
+
+
 
     constructor(id: number, name: string) {
         //Populate the array
         _Memory.initializeArray();
-
-        //Write out all of the instructions passed into write immediate to load into memory
-        this.writeImmediate(0x0000, 0xA9);
-        this.writeImmediate(0x0001, 0x0D);
-        this.writeImmediate(0x0002, 0xA9);
-        this.writeImmediate(0x0003, 0x1D);
-        this.writeImmediate(0x0004, 0xA9);
-        this.writeImmediate(0x0005, 0x2D);
-        this.writeImmediate(0x0006, 0xA9);
-        this.writeImmediate(0x0007, 0x3F);
-        this.writeImmediate(0x0008, 0xA9);
-        this.writeImmediate(0x0009, 0xFF);
-        this.writeImmediate(0x000A, 0x00);
-        this.writeImmediate(0x000B, 0x00);
-        this.writeImmediate(0x000C, 0x00);
-        this.writeImmediate(0x000D, 0x00);
-        this.writeImmediate(0x000E, 0x00);
-        this.writeImmediate(0x000F, 0x00);
+        this.startLocation = 0;
+        this.endLocation = 0;
         
-
-        // this.writeImmediate(0x0000, 0xAD);
-        // this.writeImmediate(0x0001, 0x04);
-        // this.writeImmediate(0x0002, 0x00);
-        // this.writeImmediate(0x0003, 0x00);
-        // this.writeImmediate(0x0004, 0x07);
-        
-        //call the memory dump with the first address and last address
-        //this.memoryDump(0x0000, 0x000F);
     }
 
 
@@ -58,6 +37,14 @@ module TSOS {
         console.log("COMBINE RESULT: ", this.hexlog(Result))
         //Convert Result to a number from string, pass through to memory.
         _Memory.setMar(parseInt(Result, 16));    
+    }
+
+    processCombine(){
+        //Display the bytes and store in a variable so it can be passed to memory.
+        var Result = this.hexlog(this.highOrderByte) + '' + this.hexlog(this.lowOrderByte);
+        console.log("COMBINE RESULT: ", this.hexlog(Result))
+        //Convert Result to a number from string, pass through to memory.
+        _Memory.setMar(this.startLocation + parseInt(Result, 16));    
     }
     
 
@@ -96,8 +83,24 @@ module TSOS {
         _Memory.write();
     }
 
+    processWriteImmediate(Address: number, Data: number){
+        //Pass the address to Mar
+        _Memory.setMar(this.startLocation+Address);
+        //Pass the data to Mdr
+        _Memory.setMdr(Data);
+        //Write the instruciton into memory.
+        _Memory.write();
+    }
+
     readImmediate(Address: number){
         _Memory.setMar(Address);
+        _Memory.read();
+
+        //return the data found at address
+        return _Memory.getMdr();
+    }
+    processReadImmediate(Address: number){
+        _Memory.setMar(this.startLocation + Address);
         _Memory.read();
 
         //return the data found at address

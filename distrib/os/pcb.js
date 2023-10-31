@@ -4,13 +4,14 @@ var TSOS;
         /* keep track of the prcoesses*/
         nextPid = 0;
         processMap = new Map();
+        readyQueue = [];
         constructor() { }
-        addProcess(startLocation) {
+        addProcess(startLocation, endLocation) {
             let pid = this.nextPid;
             this.nextPid += 1;
             let process = {
                 pid: pid,
-                instructionRegister: startLocation,
+                instructionRegister: 0,
                 cyclePhase: 1,
                 PC: 0,
                 Acc: 0,
@@ -21,6 +22,9 @@ var TSOS;
                 executeStep: 1,
                 carryFlag: 0,
                 isExecuting: false,
+                startLocation: startLocation,
+                endLocation: endLocation,
+                priority: 8,
             };
             this.processMap.set(pid, process);
             return pid;
@@ -32,6 +36,21 @@ var TSOS;
             }
             else {
                 return null;
+            }
+        }
+        readyProcess(pid) {
+            let process = this.processMap.get(pid);
+            if (process) {
+                this.readyQueue.push(process);
+            }
+        }
+        readyAll() {
+            let pids = this.processMap.keys();
+            for (let pid of pids) {
+                let process = this.processMap.get(pid);
+                this.readyQueue.push(process);
+                _StdOut.putText("Readied " + pid);
+                _StdOut.advanceLine();
             }
         }
         saveProcess(pid, data) {
@@ -59,6 +78,9 @@ var TSOS;
                 let xCell = row.insertCell(4);
                 let yCell = row.insertCell(5);
                 let zCell = row.insertCell(6);
+                let priorityCell = row.insertCell(7);
+                let stateCell = row.insertCell(8);
+                let locationCell = row.insertCell(9);
                 pidCell.textContent = process.pid.toString();
                 pcCell.textContent = this.hexlog(process.PC);
                 irCell.textContent = this.hexlog(process.instructionRegister);
@@ -66,6 +88,10 @@ var TSOS;
                 xCell.textContent = this.hexlog(process.Xreg);
                 yCell.textContent = this.hexlog(process.Yreg);
                 zCell.textContent = process.Zflag ? "1" : "0";
+                priorityCell.textContent = process.priority;
+                stateCell.textContent = process.isExecuting;
+                locationCell.textContent = this.hexlog(process.startLocation);
+                ;
             });
         }
     }

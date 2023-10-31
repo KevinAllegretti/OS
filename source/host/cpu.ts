@@ -30,6 +30,7 @@ module TSOS {
                     public carryFlag: number = 0,
                     public isExecuting: boolean = false,
                     public pid: number = null,
+                    public cycleTracker: number = 0,
                     ) {
 
                     
@@ -49,9 +50,13 @@ module TSOS {
             this.executeStep = 1;
             this.carryFlag = 0;
             this.isExecuting = false;
+            this.cycleTracker = 0;
         }
 
         public load(process){
+            this.ma.startLocation = process.startLocation
+            this.ma.endLocation = process.endLocation
+
             this.pid = process.pid;
             this.instructionRegister = process.instructionRegister;
             this.cyclePhase = process.cyclePhase
@@ -99,30 +104,35 @@ module TSOS {
          //initialize cpuClockCount to zero
         cpuClockCount: number = 0;
         public cycle(): void {
-            console.log("CPU Cycling", "PC: "+this.hexlog(this.PC), "ACC: " + this.hexlog(this.Acc), "IR: "+this.hexlog(this.instructionRegister), 
+            this.cycleTracker += 1
+            console.log(this.pid+"CPU Cycling", "PC: "+this.hexlog(this.PC), "ACC: " + this.hexlog(this.Acc), "IR: "+this.hexlog(this.instructionRegister), 
             "YReg: " + this.hexlog(this.Yreg),
             "XReg: " + this.hexlog(this.Xreg),
 
             )
             _Kernel.krnTrace('CPU cycle');
             this.cpuClockCount += 1;
-            switch(this.cyclePhase){
-                case(1):
-                    this.fetch()
-                    break
-                case(2):
-                    this.decode();
-                    break
-                case(3):
-                    this.execute();
-                    break
-                case(4):
-                    this.writeBack();
-                    break
-                case(5):
-                    this.interruptCheck();
-                    break                         
+
+            if (this.isExecuting == true){
+                switch(this.cyclePhase){
+                    case(1):
+                        this.fetch()
+                        break
+                    case(2):
+                        this.decode();
+                        break
+                    case(3):
+                        this.execute();
+                        break
+                    case(4):
+                        this.writeBack();
+                        break
+                    case(5):
+                        this.interruptCheck();
+                        break                         
+                }
             }
+            
             this.save();
             _PCB.renderProcessTable();
             // TODO: Accumulate CPU usage and profiling statistics here.
@@ -130,7 +140,8 @@ module TSOS {
         }
 
         fetch(){
-            var temp =  this.ma.readImmediate(this.PC);
+            var temp =  this.ma.processReadImmediate(this.PC);
+            console.log("fetched IR is ", temp)
             this.instructionRegister = temp;
             this.cyclePhase = 2;
             this.PC += 1;
@@ -146,7 +157,7 @@ module TSOS {
                 case(0xA0): //Load the Y register with a constant
                 case(0xD0): //Branch on not equals
     
-                    var temp = this.ma.readImmediate(this.PC);
+                    var temp = this.ma.processReadImmediate(this.PC);
                     this.ma.setMdr(temp)
                     this.PC += 1;
                     break
@@ -159,7 +170,7 @@ module TSOS {
                 case(0xAC): //load y register from memory
                 case(0xEC): //compare byte in memory to x register
                 case(0xEE): //Incriments byte in memory
-                    var temp = this.ma.readImmediate(this.PC);
+                    var temp = this.ma.processReadImmediate(this.PC);
                     if (this.decodeStep == 1){
                         console.log('setting low order byte ', temp)
                         this.ma.setLowOrderByte(temp);
@@ -172,7 +183,7 @@ module TSOS {
 
                         this.ma.setHighOrderByte(temp);
                         this.decodeStep = 1;
-                        this.ma.combine();
+                        this.ma.processCombine();
                     }   
                     this.PC += 1;
                     break
@@ -341,8 +352,8 @@ module TSOS {
                     else if (this.Xreg == 2){
                         var CurrYreg = this.Yreg;
                         //read current y register if not 0, then print out with ascii conversion. If it is 0 then stop.
-                        while(this.ma.readImmediate(CurrYreg) != 0){
-                            this.log(this.toAscii(this.ma.readImmediate(CurrYreg)))
+                        while(this.ma.processReadImmediate(CurrYreg) != 0){
+                            this.log(this.toAscii(this.ma.processReadImmediate(CurrYreg)))
                             CurrYreg += 1;
                         }
                     }

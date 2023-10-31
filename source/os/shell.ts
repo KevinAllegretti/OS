@@ -105,7 +105,12 @@ module TSOS {
             sc = new ShellCommand(this.shellRun,
                                     "run",
                                 "- Takes in PID and executes program")
-            this.commandList[this.commandList.length] = sc;                         
+            this.commandList[this.commandList.length] = sc;       
+            //runALl
+            sc = new ShellCommand(this.shellRunAll,
+                                "runall",
+                                "- Runs all PIDS")
+            this.commandList[this.commandList.length] = sc;                       
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
 
@@ -359,6 +364,9 @@ module TSOS {
                     case "run":
                         _StdOut.putText("Takes in PID and executes program.");
                         break;
+                    case "runall":
+                        _StdOut.putText("Runs all PIDs");
+                        break;
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
                 }
@@ -412,7 +420,7 @@ module TSOS {
         public shellLoadCommand(): void {
             const textArea = document.getElementById("taProgramInput") as HTMLTextAreaElement;
             const input = textArea.value.replaceAll(" ", '').replaceAll('\n','').trim();
-            console.log("LOAD TEST");
+            //console.log("LOAD TEST");
             //Looked up the "regex" format for hexideciaml numbers, While using the test function for a boolean value.
             const isValid = /^([0-9a-fA-F]+\s*)*$/.test(input);
             
@@ -440,8 +448,8 @@ module TSOS {
             let process = _PCB.checkProcess(parseInt(pid));
             //run process
             if (process){
-                //ask kernel to run process
-                _Kernel.runProcess(process);
+                _PCB.readyProcess(process.pid)
+                //_Kernel.runProcess(process);
             }
             else{
                 _StdOut.putText("Process with PID: " + pid + " does not exist");
@@ -449,6 +457,9 @@ module TSOS {
             }
 
 
+        }
+        public shellRunAll(){
+            _PCB.readyAll()
         }
 
     }

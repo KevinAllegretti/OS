@@ -64,6 +64,9 @@ var TSOS;
             //run 
             sc = new TSOS.ShellCommand(this.shellRun, "run", "- Takes in PID and executes program");
             this.commandList[this.commandList.length] = sc;
+            //runALl
+            sc = new TSOS.ShellCommand(this.shellRunAll, "runall", "- Runs all PIDS");
+            this.commandList[this.commandList.length] = sc;
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
             // Display the initial prompt.
@@ -296,6 +299,9 @@ var TSOS;
                     case "run":
                         _StdOut.putText("Takes in PID and executes program.");
                         break;
+                    case "runall":
+                        _StdOut.putText("Runs all PIDs");
+                        break;
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
                 }
@@ -349,7 +355,7 @@ var TSOS;
         shellLoadCommand() {
             const textArea = document.getElementById("taProgramInput");
             const input = textArea.value.replaceAll(" ", '').replaceAll('\n', '').trim();
-            console.log("LOAD TEST");
+            //console.log("LOAD TEST");
             //Looked up the "regex" format for hexideciaml numbers, While using the test function for a boolean value.
             const isValid = /^([0-9a-fA-F]+\s*)*$/.test(input);
             if (isValid) {
@@ -371,12 +377,15 @@ var TSOS;
             let process = _PCB.checkProcess(parseInt(pid));
             //run process
             if (process) {
-                //ask kernel to run process
-                _Kernel.runProcess(process);
+                _PCB.readyProcess(process.pid);
+                //_Kernel.runProcess(process);
             }
             else {
                 _StdOut.putText("Process with PID: " + pid + " does not exist");
             }
+        }
+        shellRunAll() {
+            _PCB.readyAll();
         }
     }
     TSOS.Shell = Shell;

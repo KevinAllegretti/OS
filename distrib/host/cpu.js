@@ -25,8 +25,9 @@ var TSOS;
         carryFlag;
         isExecuting;
         pid;
+        cycleTracker;
         ma = new TSOS.MemoryAccessor(1, "Memory Accessor");
-        constructor(instructionRegister = 0, cyclePhase = 1, PC = 0, Acc = 0, Xreg = 0, Yreg = 0, Zflag = false, decodeStep = 1, executeStep = 1, carryFlag = 0, isExecuting = false, pid = null) {
+        constructor(instructionRegister = 0, cyclePhase = 1, PC = 0, Acc = 0, Xreg = 0, Yreg = 0, Zflag = false, decodeStep = 1, executeStep = 1, carryFlag = 0, isExecuting = false, pid = null, cycleTracker = 0) {
             this.instructionRegister = instructionRegister;
             this.cyclePhase = cyclePhase;
             this.PC = PC;
@@ -39,6 +40,7 @@ var TSOS;
             this.carryFlag = carryFlag;
             this.isExecuting = isExecuting;
             this.pid = pid;
+            this.cycleTracker = cycleTracker;
         }
         init() {
             this.instructionRegister = 0;
@@ -52,8 +54,11 @@ var TSOS;
             this.executeStep = 1;
             this.carryFlag = 0;
             this.isExecuting = false;
+            this.cycleTracker = 0;
         }
         load(process) {
+            this.ma.startLocation = process.startLocation;
+            this.ma.endLocation = process.endLocation;
             this.pid = process.pid;
             this.instructionRegister = process.instructionRegister;
             this.cyclePhase = process.cyclePhase;
@@ -96,25 +101,28 @@ var TSOS;
         //initialize cpuClockCount to zero
         cpuClockCount = 0;
         cycle() {
-            console.log("CPU Cycling", "PC: " + this.hexlog(this.PC), "ACC: " + this.hexlog(this.Acc), "IR: " + this.hexlog(this.instructionRegister), "YReg: " + this.hexlog(this.Yreg), "XReg: " + this.hexlog(this.Xreg));
+            this.cycleTracker += 1;
+            console.log(this.pid + "CPU Cycling", "PC: " + this.hexlog(this.PC), "ACC: " + this.hexlog(this.Acc), "IR: " + this.hexlog(this.instructionRegister), "YReg: " + this.hexlog(this.Yreg), "XReg: " + this.hexlog(this.Xreg));
             _Kernel.krnTrace('CPU cycle');
             this.cpuClockCount += 1;
-            switch (this.cyclePhase) {
-                case (1):
-                    this.fetch();
-                    break;
-                case (2):
-                    this.decode();
-                    break;
-                case (3):
-                    this.execute();
-                    break;
-                case (4):
-                    this.writeBack();
-                    break;
-                case (5):
-                    this.interruptCheck();
-                    break;
+            if (this.isExecuting == true) {
+                switch (this.cyclePhase) {
+                    case (1):
+                        this.fetch();
+                        break;
+                    case (2):
+                        this.decode();
+                        break;
+                    case (3):
+                        this.execute();
+                        break;
+                    case (4):
+                        this.writeBack();
+                        break;
+                    case (5):
+                        this.interruptCheck();
+                        break;
+                }
             }
             this.save();
             _PCB.renderProcessTable();
@@ -122,7 +130,8 @@ var TSOS;
             // Do the real work here. Be sure to set this.isExecuting appropriately.
         }
         fetch() {
-            var temp = this.ma.readImmediate(this.PC);
+            var temp = this.ma.processReadImmediate(this.PC);
+            console.log("fetched IR is ", temp);
             this.instructionRegister = temp;
             this.cyclePhase = 2;
             this.PC += 1;
@@ -135,7 +144,7 @@ var TSOS;
                 case (0xA9): //Load accumulator with a constant 
                 case (0xA0): //Load the Y register with a constant
                 case (0xD0): //Branch on not equals
-                    var temp = this.ma.readImmediate(this.PC);
+                    var temp = this.ma.processReadImmediate(this.PC);
                     this.ma.setMdr(temp);
                     this.PC += 1;
                     break;
@@ -147,7 +156,7 @@ var TSOS;
                 case (0xAC): //load y register from memory
                 case (0xEC): //compare byte in memory to x register
                 case (0xEE): //Incriments byte in memory
-                    var temp = this.ma.readImmediate(this.PC);
+                    var temp = this.ma.processReadImmediate(this.PC);
                     if (this.decodeStep == 1) {
                         console.log('setting low order byte ', temp);
                         this.ma.setLowOrderByte(temp);
@@ -159,7 +168,7 @@ var TSOS;
                         console.log('setting high order byte', temp);
                         this.ma.setHighOrderByte(temp);
                         this.decodeStep = 1;
-                        this.ma.combine();
+                        this.ma.processCombine();
                     }
                     this.PC += 1;
                     break;
@@ -308,8 +317,8 @@ var TSOS;
                     else if (this.Xreg == 2) {
                         var CurrYreg = this.Yreg;
                         //read current y register if not 0, then print out with ascii conversion. If it is 0 then stop.
-                        while (this.ma.readImmediate(CurrYreg) != 0) {
-                            this.log(this.toAscii(this.ma.readImmediate(CurrYreg)));
+                        while (this.ma.processReadImmediate(CurrYreg) != 0) {
+                            this.log(this.toAscii(this.ma.processReadImmediate(CurrYreg)));
                             CurrYreg += 1;
                         }
                     }

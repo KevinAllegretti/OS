@@ -49,7 +49,7 @@ var TSOS;
         }
         handleInput() {
             //Need some console logs to test where the code is in the canvas inspection code.
-            console.log("TEST");
+            //console.log("TEST");
             while (_KernelInputQueue.getSize() > 0) {
                 // Get the next character from the kernel input queue.
                 var chr = _KernelInputQueue.dequeue();
@@ -71,9 +71,9 @@ var TSOS;
                     this.putText(chr);
                     // ... and add it to our buffer.
                     this.buffer += chr;
-                    console.log("TEST 4");
+                    //console.log("TEST 4")
                 }
-                console.log("TEST 5");
+                //console.log("TEST 5")
                 // TODO: Add a case for Ctrl-C that would allow the user to break the current program.
             }
         }
@@ -89,7 +89,7 @@ var TSOS;
                 for (let i = 0; i < input.length; i++) {
                     let text = input.charAt(i);
                     // Draw the text at the current X and Y coordinates.
-                    if (this.currentXPosition > 400) {
+                    if (this.currentXPosition > 450) {
                         this.advanceLine();
                     }
                     _DrawingContext.drawText(this.currentFont, this.currentFontSize, this.currentXPosition, this.currentYPosition, text);

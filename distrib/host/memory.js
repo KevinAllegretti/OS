@@ -77,6 +77,7 @@ var TSOS;
         //write the contents of the MDR to memory at the location indiciated by the MAR
         write() {
             this.memoryArray[this.mar] = this.mdr;
+            this.displayMemory();
         }
     }
     TSOS.Memory = Memory;
