@@ -9,7 +9,7 @@ var TSOS;
         //initialize array 
         initializeArray() {
             //for loop push hex into
-            for (let i = 0x0000; i < 0xFF * 4; i++) {
+            for (let i = 0x0000; i < this.memoryArray.length; i++) {
                 this.memoryArray[i] = 0x00;
             }
         }
@@ -29,6 +29,9 @@ var TSOS;
                         let cell = document.createElement('td');
                         cell.innerText = this.hexlog(this.memoryArray[position], 2);
                         row.appendChild(cell);
+                        if (this.memoryArray[position] != 0) {
+                            cell.style.color = "white";
+                        }
                     }
                 }
                 table.appendChild(row);

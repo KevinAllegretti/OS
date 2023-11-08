@@ -68,7 +68,19 @@ var TSOS;
             sc = new TSOS.ShellCommand(this.shellRunAll, "runall", "- Runs all PIDS");
             this.commandList[this.commandList.length] = sc;
             // ps  - list the running processes and their IDs
+            sc = new TSOS.ShellCommand(this.shellPs, "ps", "- list the running processes and their IDs");
+            this.commandList[this.commandList.length] = sc;
             // kill <id> - kills the specified process id.
+            sc = new TSOS.ShellCommand(this.shellKill, "kill", "- kills the specified process id");
+            this.commandList[this.commandList.length] = sc;
+            //quantum 
+            sc = new TSOS.ShellCommand(this.shellQuantum, "quantum", "- Sets a new quantum for process scheduler");
+            this.commandList[this.commandList.length] = sc;
+            // kill <id> - kills the specified process id.
+            sc = new TSOS.ShellCommand(this.shellKillAll, "killall", "- kills all processes");
+            this.commandList[this.commandList.length] = sc;
+            sc = new TSOS.ShellCommand(this.shellClearMem, "clearmem", "- clears memory");
+            this.commandList[this.commandList.length] = sc;
             // Display the initial prompt.
             this.putPrompt();
         }
@@ -302,6 +314,21 @@ var TSOS;
                     case "runall":
                         _StdOut.putText("Runs all PIDs");
                         break;
+                    case "quantum":
+                        _StdOut.putText("Sets a new quantum for process scheduler");
+                        break;
+                    case "ps":
+                        _StdOut.putText("List the running processes and their IDs");
+                        break;
+                    case "kill":
+                        _StdOut.putText("kills the specified process id");
+                        break;
+                    case "killall":
+                        _StdOut.putText("kills all processes");
+                        break;
+                    case "clearMem":
+                        _StdOut.putText("clears memory");
+                        break;
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
                 }
@@ -386,6 +413,42 @@ var TSOS;
         }
         shellRunAll() {
             _PCB.readyAll();
+        }
+        shellKillAll() {
+            _PCB.killAll();
+        }
+        shellClearMem() {
+            _MemoryManager.clearMemory();
+        }
+        shellPs() {
+            _PCB.printProcessTable();
+        }
+        shellKill(args) {
+            //check if there is a process of given ID
+            let pid = args[0];
+            if (!pid || parseInt(pid) == null) {
+                _StdOut.putText("Enter PID to kill.");
+                return;
+            }
+            let process = _PCB.checkProcess(parseInt(pid));
+            //run process
+            if (process) {
+                _PCB.killProcess(process.pid);
+                //_Kernel.runProcess(process);
+            }
+            else {
+                _StdOut.putText("Process with PID: " + pid + " does not exist");
+            }
+        }
+        shellQuantum(args) {
+            //check if there is a process of given ID
+            let quantum = args[0];
+            if (!quantum || parseInt(quantum) == null || parseInt(quantum) < 1) {
+                _StdOut.putText("Enter Quantum to run.");
+                return;
+            }
+            _Kernel.userQuant = parseInt(quantum);
+            _StdOut.putText("New Quantum: " + quantum);
         }
     }
     TSOS.Shell = Shell;

@@ -27,6 +27,10 @@ module TSOS {
                 startLocation: startLocation,
                 endLocation: endLocation,
                 priority: 8,
+                highOrderByte: 0,
+                lowOrderByte: 0,
+                mdr:0,
+                mar:0
 
             }
 
@@ -54,6 +58,27 @@ module TSOS {
         }
        }
 
+       public killProcess(pid:number){
+        function filterPS(process){
+            if (process.pid == pid){
+                return false;
+            }
+            return true;
+        }
+        this.readyQueue = this.readyQueue.filter(filterPS)
+        this.processMap.delete(pid);
+        _StdOut.putText("Killed process "+pid);
+        _StdOut.advanceLine();
+       }
+
+       public killAll(){
+        this.readyQueue = [];
+        this.processMap = new Map();
+        _CPU.isExecuting = false;
+        _StdOut.putText("Killed all processes");
+        _StdOut.advanceLine();
+       }
+
        public readyAll(){
         let pids = this.processMap.keys();
         for (let pid of pids){
@@ -61,7 +86,7 @@ module TSOS {
             this.readyQueue.push(process);
             _StdOut.putText("Readied "+pid);
             _StdOut.advanceLine();
-
+            _CPU.isExecuting = false;
 
         }
        }
@@ -112,8 +137,41 @@ module TSOS {
     stateCell.textContent = process.isExecuting;
     locationCell.textContent = this.hexlog(process.startLocation);;
     });
+    this.renderReadyTable();
         }
     
+        public printProcessTable() {
+            this.processMap.forEach((process, pid) => {
+                _StdOut.putText("#"+process.pid+" - " + process.isExecuting);
+                _StdOut.advanceLine();
+            });
+        }
+        public renderReadyTable() {
+            //console.log("Rendering Process Table");
+            //console.log(this.processMap);
+            const tableBody = document.getElementById('readyTable').getElementsByTagName('tbody')[0];
+            tableBody.innerHTML = ''; // Clear any existing rows
+            for (let i =0; i < this.readyQueue.length; i++){
+                let process = this.readyQueue[i]
+                let row = tableBody.insertRow();
+                let pidCell = row.insertCell(0);        
+                let priorityCell = row.insertCell(1);
+                let baseCell = row.insertCell(2);
+                let limitCell = row.insertCell(3);
+                let segmentCell = row.insertCell(4);
+                let stateCell = row.insertCell(5);
+                let quantumCell = row.insertCell(6);
+                baseCell.textContent = this.hexlog(process.startLocation);
+                limitCell.textContent = this.hexlog(process.endLocation);
+                segmentCell.textContent = this.hexlog(process.endLocation-process.startLocation);
+                quantumCell.textContent = this.hexlog(_Kernel.userQuant);
+
+                pidCell.textContent = process.pid.toString();
+            
+                priorityCell.textContent = process.priority;
+                stateCell.textContent = process.isExecuting;
     
+            }
+        }
     }
 }

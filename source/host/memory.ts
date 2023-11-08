@@ -1,8 +1,8 @@
 module TSOS {
     export class Memory {
 
-    private mar: number = 0x0000;
-    private mdr: number = 0x00;
+    public mar: number = 0x0000;
+    public mdr: number = 0x00;
 
 
     //keep variables up top
@@ -12,7 +12,7 @@ module TSOS {
     //initialize array 
     public initializeArray(){
         //for loop push hex into
-        for (let i: number = 0x0000; i < 0xFF * 4; i++){      
+        for (let i: number = 0x0000; i < this.memoryArray.length; i++){      
             this.memoryArray[i] = 0x00;
         }
     }
@@ -35,6 +35,9 @@ module TSOS {
                     let cell = document.createElement('td');
                     cell.innerText = this.hexlog(this.memoryArray[position],2)
                     row.appendChild(cell);
+                    if (this.memoryArray[position] != 0){
+                        cell.style.color = "white";
+                    }
                 }
             }
 

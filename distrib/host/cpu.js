@@ -71,6 +71,10 @@ var TSOS;
             this.executeStep = process.executeStep;
             this.carryFlag = process.carryFlag;
             this.isExecuting = process.isExecuting;
+            this.ma.highOrderByte = process.highOrderByte;
+            this.ma.lowOrderByte = process.lowOrderByte;
+            _Memory.mdr = process.mdr;
+            _Memory.mar = process.mar;
         }
         save() {
             let process = _PCB.checkProcess(this.pid);
@@ -85,6 +89,10 @@ var TSOS;
             process.executeStep = this.executeStep;
             process.carryFlag = this.carryFlag;
             process.isExecuting = this.isExecuting;
+            process.highOrderByte = this.ma.highOrderByte;
+            process.lowOrderByte = this.ma.lowOrderByte;
+            process.mdr = _Memory.mdr;
+            process.mar = _Memory.mar;
         }
         log(message) {
             console.log(message);

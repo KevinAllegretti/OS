@@ -14,6 +14,11 @@ var TSOS;
             // Check if the memory at the given address is not zero
             return _Memory.memoryArray[address] !== 0x00;
         }
+        clearMemory() {
+            _Memory.initializeArray();
+            _StdOut.putText("Cleared memory");
+            _StdOut.advanceLine();
+        }
     }
     TSOS.MemoryManager = MemoryManager;
 })(TSOS || (TSOS = {}));

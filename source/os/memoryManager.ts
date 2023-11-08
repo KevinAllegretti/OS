@@ -16,7 +16,11 @@ module TSOS {
         return _Memory.memoryArray[address] !== 0x00;
     }
     
-    
+    public clearMemory(){
+        _Memory.initializeArray();
+        _StdOut.putText("Cleared memory");
+        _StdOut.advanceLine();
+    }
     
     }
 }    

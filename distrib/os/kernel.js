@@ -9,9 +9,13 @@
 var TSOS;
 (function (TSOS) {
     class Kernel {
+        userQuant = 10;
         //
         // OS Startup and Shutdown Routines
         //
+        constructor() {
+            this.userQuant = 10;
+        }
         krnBootstrap() {
             TSOS.Control.hostLog("bootstrap", "host"); // Use hostLog because we ALWAYS want this, even if _Trace is off.
             // Initialize our global queues.
@@ -70,7 +74,7 @@ var TSOS;
                 this.krnInterruptHandler(interrupt.irq, interrupt.params);
             }
             else if (_CPU.isExecuting || _PCB.readyQueue.length > 0) { // If there are no interrupts then run one CPU cycle if there is anything being processed.
-                if (_CPU.cycleTracker % 6 == 0) {
+                if (_CPU.cycleTracker % this.userQuant == 0) {
                     if (_CPU.pid != null) {
                         _CPU.save();
                         var oldProcess = _PCB.checkProcess(_CPU.pid);

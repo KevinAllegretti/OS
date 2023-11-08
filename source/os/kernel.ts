@@ -10,9 +10,14 @@
 module TSOS {
 
     export class Kernel {
+
+        public userQuant:number=10;
         //
         // OS Startup and Shutdown Routines
         //
+        constructor(){
+            this.userQuant = 10
+        }
 
         public krnBootstrap() {      // Page 8. {
             Control.hostLog("bootstrap", "host");  // Use hostLog because we ALWAYS want this, even if _Trace is off.
@@ -85,7 +90,7 @@ module TSOS {
                 var interrupt = _KernelInterruptQueue.dequeue();
                 this.krnInterruptHandler(interrupt.irq, interrupt.params);
             } else if (_CPU.isExecuting || _PCB.readyQueue.length > 0) { // If there are no interrupts then run one CPU cycle if there is anything being processed.
-                if (_CPU.cycleTracker%6 == 0){
+                if (_CPU.cycleTracker%this.userQuant == 0){
                     
 
                     if (_CPU.pid != null){

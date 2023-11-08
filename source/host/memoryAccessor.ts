@@ -1,7 +1,7 @@
 module TSOS {
     export class MemoryAccessor {
-    private lowOrderByte : number = null;
-    private highOrderByte : number = null;
+    public lowOrderByte : number = null;
+    public highOrderByte : number = null;
     public startLocation:number = 0;
     public endLocation:number = 0;
 
