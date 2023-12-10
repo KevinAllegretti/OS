@@ -373,7 +373,7 @@ var TSOS;
             "Device Control 3",
             "Device Control 4",
             "Negative ACK",
-            "Synchronous idle",
+            '"',
             "End of Trans. Block",
             "Cancel",
             "End of Medium",
@@ -484,6 +484,13 @@ var TSOS;
         //List should accept the byte which will be the index of the ascii and return the ascii
         toAscii(tempByte) {
             return this.library[tempByte];
+        }
+        fromAscii(ascii) {
+            for (let i = 0; i < this.library.length; i++) {
+                if (this.library[i] == ascii) {
+                    return i;
+                }
+            }
         }
     }
     TSOS.Cpu = Cpu;

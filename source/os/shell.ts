@@ -134,9 +134,41 @@ module TSOS {
             sc = new ShellCommand(this.shellClearMem,
                 "clearmem",
                 "- clears memory")
-            this.commandList[this.commandList.length] = sc;      
+            this.commandList[this.commandList.length] = sc;   
 
-
+            sc = new ShellCommand(this.shellFormat,
+                "format",
+                "- 	Initialize	all	blocks	in	all	sectors	in	all	tracks")
+            this.commandList[this.commandList.length] = sc; 
+            
+            sc = new ShellCommand(this.shellCreate,
+                "create",
+                "-  Create the file filename")
+            this.commandList[this.commandList.length] = sc;     
+            sc = new ShellCommand(this.shellRead,
+                "read",
+                "-  Read and display the contents of filename")
+            this.commandList[this.commandList.length] = sc;    
+            sc = new ShellCommand(this.shellWrite,
+                "write",
+                "-  Write the data inside the quotes to filename")
+            this.commandList[this.commandList.length] = sc;    
+            sc = new ShellCommand(this.shellDelete,
+                "delete",
+                "-  Remove filename from storage")
+            this.commandList[this.commandList.length] = sc;
+            sc = new ShellCommand(this.shellCopy,
+                "copy",
+                "-  copy")
+            this.commandList[this.commandList.length] = sc;   
+            sc = new ShellCommand(this.shellRename,
+                "rename",
+                "-  rename")
+            this.commandList[this.commandList.length] = sc;  
+            sc = new ShellCommand(this.shellLs,
+                "ls",
+                "-  list the files currently stored on the disk")
+            this.commandList[this.commandList.length] = sc;           
             // Display the initial prompt.
             this.putPrompt();
         }
@@ -405,6 +437,30 @@ module TSOS {
                             case "clearMem":
                                 _StdOut.putText("clears memory");
                             break;
+                            case "format":
+                                _StdOut.putText("Initialize	all	blocks	in	all	sectors	in	all	tracks");
+                            break;
+                            case "create":
+                                _StdOut.putText("Create	the	file filename");
+                            break;
+                            case "read":
+                                _StdOut.putText("Read and display the contents of filename");
+                            break;
+                            case "write":
+                                _StdOut.putText("write the data inside of the qoutes to filename");
+                            break;
+                            case "delete":
+                                _StdOut.putText("remove filename from storage");
+                            break;
+                            case "copy":
+                                _StdOut.putText("copy");
+                            break;
+                            case "rename":
+                                _StdOut.putText("rename");
+                            break;
+                            case "ls":
+                                _StdOut.putText("list the files currently stored on the disk");
+                            break;
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
                 }
@@ -548,5 +604,62 @@ module TSOS {
             _StdOut.putText("New Quantum: "+ quantum);
         }
 
+        public shellFormat(args: string[]){
+            console.log("Formating disk")
+            _krnDiskSystemDriver.format();
+        }
+
+        public shellCreate(args: string[]){
+            var filename = args[0];
+            if (!filename){
+                _StdOut.putText("Enter filename.");
+                return;
+            }
+            _krnDiskSystemDriver.create(filename);
+        }
+
+        public shellRead(args: string[]){
+
+        }
+
+        public shellWrite(args: string[]){
+            var filename = args[0];
+            if (!filename){
+                _StdOut.putText("Enter filename.");
+                return;
+            }
+
+            args.shift();
+            var fileinput = args.join(" ").trim();
+            if (!fileinput || fileinput.charAt(0) != `"`|| fileinput.charAt(fileinput.length-1) != `"` ){
+                _StdOut.putText("Enter input surrounded by quotes.");
+                return;
+            }
+
+            // remove quotes here
+
+            _krnDiskSystemDriver.write(filename, fileinput);
+
+        }
+
+        public shellDelete(args: string[]){
+            
+        }
+
+        public shellCopy(args: string[]){
+            
+        }
+
+        public shellRename(args: string[]){
+            
+        }
+
+
+        public shellLs(args: string[]){
+            
+        }
     }
+
+
+  
 }

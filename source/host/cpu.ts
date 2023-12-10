@@ -421,7 +421,7 @@ module TSOS {
         "Device Control 3",
         "Device Control 4",
         "Negative ACK",
-        "Synchronous idle",
+        '"',
         "End of Trans. Block",
         "Cancel",
         "End of Medium",
@@ -535,6 +535,14 @@ module TSOS {
 
         return this.library[tempByte]
 
+    }
+
+    fromAscii(ascii:String){
+        for (let i = 0; i < this.library.length; i++){
+            if (this.library[i] == ascii){
+                return i
+            }
+        }
     }
 
 

@@ -89,6 +89,9 @@ var TSOS;
                 chr = String.fromCharCode(keyCode);
                 _KernelInputQueue.enqueue(chr);
             }
+            else if (keyCode == 222 && isShifted) {
+                _KernelInputQueue.enqueue('"');
+            }
         }
     }
     TSOS.DeviceDriverKeyboard = DeviceDriverKeyboard;

@@ -27,6 +27,8 @@
    <script type="text/javascript" src="distrib/os/console.js"></script>
    <script type="text/javascript" src="distrib/os/deviceDriver.js"></script>
    <script type="text/javascript" src="distrib/os/deviceDriverKeyboard.js"></script>
+   <script type="text/javascript" src="distrib/os/deviceDriverDiskSystem.js"></script>
+
    <script type="text/javascript" src="distrib/os/queue.js"></script>
    <script type="text/javascript" src="distrib/os/shell.js"></script>
    <script type="text/javascript" src="distrib/os/shellCommand.js"></script>
@@ -48,7 +50,7 @@
 
 <div id="divMain" style="width:100%;">
 
-   <div id="divMemoryTable" style="right:20px; max-height:300px; position:absolute"> 
+   <div id="divMemoryTable" style="right:20px; max-height:600px; position:absolute;overflow-y:auto;"> 
       <h5>Memory</h5>
       <table id="memorytable">
           <tbody>
@@ -215,6 +217,23 @@
    Reproduction is inhibited without the express written consent of
    Ted Codd, Stevie Ray Vaughan, Neil Peart, and Ian Fleming.
 </p>
+
+<div id="divDiskTable" style="margin-right:40px;">
+   <table>
+      <caption>Disk</caption>
+      <thead>
+         <tr>
+            <th>T:S:B</th>
+            <th>In Use</th>
+            <th>Next T:S:B</th>
+            <th>Data</th>
+         </tr>
+      </thead>
+      <tbody id="diskTable">
+      </tbody>
+   </table>
+</div>
+
 
 </body>
 </html>
