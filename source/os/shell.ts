@@ -549,8 +549,6 @@ module TSOS {
                 _StdOut.putText("Process with PID: " + pid + " does not exist");
 
             }
-
-
         }
 
 
@@ -619,6 +617,13 @@ module TSOS {
         }
 
         public shellRead(args: string[]){
+            var filename = args[0];
+            if (!filename){
+                _StdOut.putText("Enter filename.");
+                return;
+            }
+
+            _krnDiskSystemDriver.read(filename);
 
         }
 
@@ -643,20 +648,59 @@ module TSOS {
         }
 
         public shellDelete(args: string[]){
-            
+            var filename = args[0];
+            if (!filename){
+                _StdOut.putText("Enter filename.");
+                return;
+            }
+
+            _krnDiskSystemDriver.delete(filename);
+
         }
 
         public shellCopy(args: string[]){
-            
+            var filename = args[0];
+            if (!filename){
+                _StdOut.putText("Enter filename.");
+                return;
+            }
+
+            var newFilename = args[1];
+            if (!newFilename){
+                _StdOut.putText("Enter new file");
+                return;
+            }
+
+
+
+            _krnDiskSystemDriver.copy(filename, newFilename);
+
         }
 
+        
+
         public shellRename(args: string[]){
-            
+            var filename = args[0];
+            if (!filename){
+                _StdOut.putText("Enter filename.");
+                return;
+            }
+
+            var newFilename = args[1];
+            if (!newFilename){
+                _StdOut.putText("Enter new filename.");
+                return;
+            }
+
+
+
+            _krnDiskSystemDriver.rename(filename, newFilename);
+
         }
 
 
         public shellLs(args: string[]){
-            
+            _krnDiskSystemDriver.list();
         }
     }
 

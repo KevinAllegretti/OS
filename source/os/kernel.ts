@@ -7,6 +7,8 @@
      Operating System Concepts 8th edition by Silberschatz, Galvin, and Gagne.  ISBN 978-0-470-12872-5
      ------------ */
 
+import { start } from "repl";
+
 module TSOS {
 
     export class Kernel {
@@ -77,6 +79,37 @@ module TSOS {
             this.krnTrace("end shutdown OS");
         }
 
+        public saveProcessToDisk(process){
+            let data = [];
+            for (let i =process.startLocation; i < process.endLocation; i++){
+                data.push(_CPU.ma.readImmediate(i));
+                _CPU.ma.writeImmediate(i,0);
+            }
+            process.startLocation = 0;
+            process.endLocation = 0;
+            process.currentLocation = "disk"
+
+            let processName = "process"+process.pid;
+            _krnDiskSystemDriver.create(processName);
+            _krnDiskSystemDriver.write(processName, data.join("-"));
+        }
+        public loadFromDisk(process){
+            let processName = "process"+process.pid;
+            let processData = _krnDiskSystemDriver.returnRead(processName).split("-")
+            _krnDiskSystemDriver.delete(processName);
+            let startLocation = 0;
+            while (_CPU.ma.readImmediate(startLocation) != 0){
+                startLocation += 256
+            }
+            process.startLocation = startLocation;
+            process.endLocation = startLocation+256;
+            process.currentLocation = "memory";
+            for (let i = process.startLocation; i < process.endLocation; i++){
+                _CPU.ma.writeImmediate(i , parseInt(processData[i],16));
+                _CPU.ma.writeImmediate(i,0);
+            }
+        }
+
         
         public krnOnCPUClockPulse() {
             /* This gets called from the host hardware simulation every time there is a hardware clock pulse.
@@ -94,11 +127,15 @@ module TSOS {
             } else if (_CPU.isExecuting || _PCB.readyQueue.length > 0) { // If there are no interrupts then run one CPU cycle if there is anything being processed.
                 if (_CPU.cycleTracker%this.userQuant == 0){
                     
-
                     if (_CPU.pid != null){
                         _CPU.save();
 
                         var oldProcess = _PCB.checkProcess(_CPU.pid);
+
+                        if (_PCB.readyQueue.length > 2){
+                            this.saveProcessToDisk(oldProcess);
+                        }
+
                         if (oldProcess.isExecuting == true){
                             _PCB.readyQueue.push(oldProcess);
                         }
@@ -107,6 +144,11 @@ module TSOS {
 
                     var newProcess = _PCB.readyQueue[0];
                     _PCB.readyQueue.shift();
+
+                    if (newProcess.currentLocation == "disk"){
+                        this.loadFromDisk(newProcess);
+                    }
+
                     this.runProcess(newProcess);
 
 
@@ -204,23 +246,47 @@ module TSOS {
         }
 
         public createProcess(input: string){
-            //Tracker for memory address
-            let tracker: number = 0;
 
-           for (let i = 0; i < input.length; i+= 2){
-                let a = input.charAt(i);
-                let b = input.charAt(i + 1);
-                let c = a + b;
-                //console.log('combining ',a,'+',b, '=',parseInt(c,16))
-                //console.log(_MemoryManager.nextProcessByte, tracker)
-                _CPU.ma.writeImmediate(_MemoryManager.nextProcessByte + tracker, parseInt(c,16));
-                //console.log("writing to ",_MemoryManager.nextProcessByte + tracker)
-                tracker += 1;
-           }
+            // Write to disk if more than 3 processes
+            if (_PCB.processMap.size >= 3){
+                let pid = _PCB.addProcessinDisk()
 
-           let pid = _PCB.addProcess(_MemoryManager.nextProcessByte,_MemoryManager.nextProcessByte+tracker)
-            _MemoryManager.nextProcessByte = _MemoryManager.nextProcessByte + tracker + 256
-            return pid;
+                //Tracker for memory address
+                let fileContent = []
+                for (let i = 0; i < input.length; i+= 2){
+                    let a = input.charAt(i);
+                    let b = input.charAt(i + 1);
+                    let c = a + b;
+                    //console.log('combining ',a,'+',b, '=',parseInt(c,16))
+                    //console.log(_MemoryManager.nextProcessByte, tracker)
+                    fileContent.push(c)
+                }
+                let processName = "process"+pid;
+                _krnDiskSystemDriver.create(processName);
+                _krnDiskSystemDriver.write(processName, fileContent.join("-"));
+
+                return pid;
+            }
+            // otherwise write to memory
+            else{
+                //Tracker for memory address
+                let tracker: number = 0;
+                for (let i = 0; i < input.length; i+= 2){
+                    let a = input.charAt(i);
+                    let b = input.charAt(i + 1);
+                    let c = a + b;
+                    //console.log('combining ',a,'+',b, '=',parseInt(c,16))
+                    //console.log(_MemoryManager.nextProcessByte, tracker)
+                    _CPU.ma.writeImmediate(_MemoryManager.nextProcessByte + tracker, parseInt(c,16));
+                    //console.log("writing to ",_MemoryManager.nextProcessByte + tracker)
+                    tracker += 1;
+                }
+
+                let pid = _PCB.addProcessInMem(_MemoryManager.nextProcessByte,_MemoryManager.nextProcessByte+256)
+                _MemoryManager.nextProcessByte = _MemoryManager.nextProcessByte + 256;
+
+                return pid;
+            }
         }
         
         public runProcess(process){

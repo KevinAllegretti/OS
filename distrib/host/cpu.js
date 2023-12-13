@@ -93,6 +93,7 @@ var TSOS;
             process.lowOrderByte = this.ma.lowOrderByte;
             process.mdr = _Memory.mdr;
             process.mar = _Memory.mar;
+            return process;
         }
         log(message) {
             console.log(message);

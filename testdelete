@@ -4,6 +4,8 @@
    The Kernel Disk System Driver.
    ---------------------------------- */
 
+import { connect } from "http2";
+
 module TSOS {
 
     // Extends DeviceDriver
@@ -200,7 +202,6 @@ module TSOS {
 
         }
 
-
         public read(filename:string){
             console.log("reading", filename)
             let fileLocation = this.findFileLocation(filename);
@@ -247,148 +248,9 @@ module TSOS {
             }
         }
 
-        public returnRead(filename:string):string{
-            console.log("reading", filename)
-            let message = ""
-            let fileLocation = this.findFileLocation(filename);
-            if (!fileLocation){
-                // add STD output here 
-                console.log("Bad file name");
-                return;
-            }
-
-            let headerString = sessionStorage.getItem(fileLocation);
-            if (!headerString){
-                console.log("NO header data");
-                return;
-            }
-            let headerData = headerString.split("-");
-            let nextTrack = (headerData[61])
-            let nextSect = (headerData[62]);
-            let nextBlock = (headerData[63]);
-
-            let firstContentLocation  = ""+nextTrack+":"+nextSect+":"+nextBlock;
-            let contentLocation = firstContentLocation;
-            let contentData = sessionStorage.getItem(contentLocation).split("-");
-            let nextByteSlot = 0;
-            console.log("Starting location", firstContentLocation)
-            console.log("Starting content: ", contentData)
-            while ( parseInt(contentData[nextByteSlot]) != 0){
-                let char = parseInt(contentData[nextByteSlot]) 
-                let ascii = _CPU.toAscii(char);
-                message += ascii;
-                nextByteSlot++;
-                if (nextByteSlot == 60 ){
-                    nextTrack = (contentData[61])
-                    nextSect = (contentData[62]);
-                    nextBlock = (contentData[63]);
-        
-                    let nextLocation  = ""+nextTrack+":"+nextSect+":"+nextBlock;
-                    if (nextLocation != "0:0:0"){
-                        contentData = sessionStorage.getItem(nextLocation).split("-");
-                        nextByteSlot = 0;
-                        contentLocation = nextLocation;
-                    }
-        
-                }
-            }
-            return message;
-        }
 
 
-        public delete(filename:string){
-            console.log("delete", filename)
-            let fileLocation = this.findFileLocation(filename);
-            if (!fileLocation){
-                // add STD output here 
-                console.log("Bad file name");
-                return;
-            }
 
-            let headerString = sessionStorage.getItem(fileLocation);
-            if (!headerString){
-                console.log("NO header data");
-                return;
-            }
-            let headerData = headerString.split("-");
-            let nextTrack = (headerData[61])
-            let nextSect = (headerData[62]);
-            let nextBlock = (headerData[63]);
-
-            headerData[60] = "0";
-            sessionStorage.setItem(fileLocation, headerData.join("-"));
-            console.log("Saving item" ,headerData )
-
-            let firstContentLocation  = ""+nextTrack+":"+nextSect+":"+nextBlock;
-            let contentLocation = firstContentLocation;
-            let contentData = sessionStorage.getItem(contentLocation).split("-");
-            let nextByteSlot = 0;
-            console.log("Starting location", firstContentLocation)
-            console.log("Starting content: ", contentData)
-
-
-            while ( parseInt(contentData[nextByteSlot]) != 0){
-                nextByteSlot++;
-                if (nextByteSlot == 60 || parseInt(contentData[nextByteSlot]) == 0){
-                    nextTrack = (contentData[61])
-                    nextSect = (contentData[62]);
-                    nextBlock = (contentData[63]);
-
-                    contentData[60] = "0";
-                    sessionStorage.setItem(contentLocation, contentData.join("-"));
-                    
-                    let nextLocation  = ""+nextTrack+":"+nextSect+":"+nextBlock;
-                    contentData = sessionStorage.getItem(nextLocation).split("-");
-                    nextByteSlot = 0;
-                    contentLocation = nextLocation;
-                    
-
-        
-                }
-            }
-        }
-
-        public list(){
-            for (let t = 0; t < 1;t++){
-                for (let s = 0; s < this.sectors; s++){
-                    for(let b = 0; b <this.blocks; b++){
-                        let name = ""+t+":"+s+":"+b;
-                        if (name == "0:0:0"){
-                            continue;
-                        }
-                        let saved = sessionStorage.getItem(name);
-                        if (saved == null){
-                            continue;
-                        }
-                        let data = saved.split("-");
-                        if (parseInt(data[60]) == 1){
-                            let name = "";
-                            for (let n = 0; n < data.length && parseInt(data[n]) != 0; n++){
-                                name+=_CPU.toAscii(parseInt(data[n]));
-                            }
-                            _StdOut.putText(name);
-                            _StdOut.advanceLine();
-                        }
-
-                    }
-                }
-            }
-
-        }
-
-        public copy(oldFilename: string, newFilename){
-            let oldFileContent = this.returnRead(oldFilename);
-            this.create(newFilename);
-            this.write(newFilename, oldFileContent);
-        }
-
-        public rename(oldFilename: string, newFilename){
-            let oldFileContent = this.returnRead(oldFilename);
-            this.delete(oldFilename);
-            this.create(newFilename);
-            this.write(newFilename, oldFileContent);
-        }
-        
 
         public renderDisk(){
             //console.log(this.memoryArray)

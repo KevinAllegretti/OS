@@ -17,25 +17,25 @@ var TSOS;
             this.userQuant = 10;
         }
         krnBootstrap() {
-            TSOS.Control.hostLog("bootstrap", "host"); // Use hostLog because we ALWAYS want this, even if _Trace is off.
+            Control.hostLog("bootstrap", "host"); // Use hostLog because we ALWAYS want this, even if _Trace is off.
             // Initialize our global queues.
-            _KernelInterruptQueue = new TSOS.Queue(); // A (currently) non-priority queue for interrupt requests (IRQs).
+            _KernelInterruptQueue = new Queue(); // A (currently) non-priority queue for interrupt requests (IRQs).
             _KernelBuffers = new Array(); // Buffers... for the kernel.
-            _KernelInputQueue = new TSOS.Queue(); // Where device input lands before being processed out somewhere.
+            _KernelInputQueue = new Queue(); // Where device input lands before being processed out somewhere.
             // Initialize the console.
-            _Console = new TSOS.Console(); // The command line interface / console I/O device.
+            _Console = new Console(); // The command line interface / console I/O device.
             _Console.init();
             // Initialize standard input and output to the _Console.
             _StdIn = _Console;
             _StdOut = _Console;
             // Load the Keyboard Device Driver
             this.krnTrace("Loading the keyboard device driver.");
-            _krnKeyboardDriver = new TSOS.DeviceDriverKeyboard(); // Construct it.
+            _krnKeyboardDriver = new DeviceDriverKeyboard(); // Construct it.
             _krnKeyboardDriver.driverEntry(); // Call the driverEntry() initialization routine.
             this.krnTrace(_krnKeyboardDriver.status);
             // load disk system
             this.krnTrace("Loading the disk system device driver.");
-            _krnDiskSystemDriver = new TSOS.DeviceDriverDiskSystem(); // Construct it.
+            _krnDiskSystemDriver = new DeviceDriverDiskSystem(); // Construct it.
             _krnDiskSystemDriver.driverEntry(); // Call the driverEntry() initialization routine.
             this.krnTrace(_krnDiskSystemDriver.status);
             // Enable the OS Interrupts.  (Not the CPU clock interrupt, as that is done in the hardware sim.)
@@ -43,7 +43,7 @@ var TSOS;
             this.krnEnableInterrupts();
             // Launch the shell.
             this.krnTrace("Creating and Launching the shell.");
-            _OsShell = new TSOS.Shell();
+            _OsShell = new Shell();
             _OsShell.init();
             // Finally, initiate student testing protocol.
             if (_GLaDOS) {
@@ -61,6 +61,35 @@ var TSOS;
             // More?
             //
             this.krnTrace("end shutdown OS");
+        }
+        saveProcessToDisk(process) {
+            let data = [];
+            for (let i = process.startLocation; i < process.endLocation; i++) {
+                data.push(_CPU.ma.readImmediate(i));
+                _CPU.ma.writeImmediate(i, 0);
+            }
+            process.startLocation = 0;
+            process.endLocation = 0;
+            process.currentLocation = "disk";
+            let processName = "process" + process.pid;
+            _krnDiskSystemDriver.create(processName);
+            _krnDiskSystemDriver.write(processName, data.join("-"));
+        }
+        loadFromDisk(process) {
+            let processName = "process" + process.pid;
+            let processData = _krnDiskSystemDriver.returnRead(processName).split("-");
+            _krnDiskSystemDriver.delete(processName);
+            let startLocation = 0;
+            while (_CPU.ma.readImmediate(startLocation) != 0) {
+                startLocation += 256;
+            }
+            process.startLocation = startLocation;
+            process.endLocation = startLocation + 256;
+            process.currentLocation = "memory";
+            for (let i = process.startLocation; i < process.endLocation; i++) {
+                _CPU.ma.writeImmediate(i, parseInt(processData[i], 16));
+                _CPU.ma.writeImmediate(i, 0);
+            }
         }
         krnOnCPUClockPulse() {
             /* This gets called from the host hardware simulation every time there is a hardware clock pulse.
@@ -80,12 +109,18 @@ var TSOS;
                     if (_CPU.pid != null) {
                         _CPU.save();
                         var oldProcess = _PCB.checkProcess(_CPU.pid);
+                        if (_PCB.readyQueue.length > 2) {
+                            this.saveProcessToDisk(oldProcess);
+                        }
                         if (oldProcess.isExecuting == true) {
                             _PCB.readyQueue.push(oldProcess);
                         }
                     }
                     var newProcess = _PCB.readyQueue[0];
                     _PCB.readyQueue.shift();
+                    if (newProcess.currentLocation == "disk") {
+                        this.loadFromDisk(newProcess);
+                    }
                     this.runProcess(newProcess);
                 }
                 _CPU.cycle();
@@ -102,12 +137,12 @@ var TSOS;
         //
         krnEnableInterrupts() {
             // Keyboard
-            TSOS.Devices.hostEnableKeyboardInterrupt();
+            Devices.hostEnableKeyboardInterrupt();
             // Put more here.
         }
         krnDisableInterrupts() {
             // Keyboard
-            TSOS.Devices.hostDisableKeyboardInterrupt();
+            Devices.hostDisableKeyboardInterrupt();
             // Put more here.
         }
         krnInterruptHandler(irq, params) {
@@ -160,30 +195,51 @@ var TSOS;
                     if (_OSclock % 10 == 0) {
                         // Check the CPU_CLOCK_INTERVAL in globals.ts for an
                         // idea of the tick rate and adjust this line accordingly.
-                        TSOS.Control.hostLog(msg, "OS");
+                        Control.hostLog(msg, "OS");
                     }
                 }
                 else {
-                    TSOS.Control.hostLog(msg, "OS");
+                    Control.hostLog(msg, "OS");
                 }
             }
         }
         createProcess(input) {
-            //Tracker for memory address
-            let tracker = 0;
-            for (let i = 0; i < input.length; i += 2) {
-                let a = input.charAt(i);
-                let b = input.charAt(i + 1);
-                let c = a + b;
-                //console.log('combining ',a,'+',b, '=',parseInt(c,16))
-                //console.log(_MemoryManager.nextProcessByte, tracker)
-                _CPU.ma.writeImmediate(_MemoryManager.nextProcessByte + tracker, parseInt(c, 16));
-                //console.log("writing to ",_MemoryManager.nextProcessByte + tracker)
-                tracker += 1;
+            // Write to disk if more than 3 processes
+            if (_PCB.processMap.size >= 3) {
+                let pid = _PCB.addProcessinDisk();
+                //Tracker for memory address
+                let fileContent = [];
+                for (let i = 0; i < input.length; i += 2) {
+                    let a = input.charAt(i);
+                    let b = input.charAt(i + 1);
+                    let c = a + b;
+                    //console.log('combining ',a,'+',b, '=',parseInt(c,16))
+                    //console.log(_MemoryManager.nextProcessByte, tracker)
+                    fileContent.push(c);
+                }
+                let processName = "process" + pid;
+                _krnDiskSystemDriver.create(processName);
+                _krnDiskSystemDriver.write(processName, fileContent.join("-"));
+                return pid;
             }
-            let pid = _PCB.addProcess(_MemoryManager.nextProcessByte, _MemoryManager.nextProcessByte + tracker);
-            _MemoryManager.nextProcessByte = _MemoryManager.nextProcessByte + tracker + 256;
-            return pid;
+            // otherwise write to memory
+            else {
+                //Tracker for memory address
+                let tracker = 0;
+                for (let i = 0; i < input.length; i += 2) {
+                    let a = input.charAt(i);
+                    let b = input.charAt(i + 1);
+                    let c = a + b;
+                    //console.log('combining ',a,'+',b, '=',parseInt(c,16))
+                    //console.log(_MemoryManager.nextProcessByte, tracker)
+                    _CPU.ma.writeImmediate(_MemoryManager.nextProcessByte + tracker, parseInt(c, 16));
+                    //console.log("writing to ",_MemoryManager.nextProcessByte + tracker)
+                    tracker += 1;
+                }
+                let pid = _PCB.addProcessInMem(_MemoryManager.nextProcessByte, _MemoryManager.nextProcessByte + 256);
+                _MemoryManager.nextProcessByte = _MemoryManager.nextProcessByte + 256;
+                return pid;
+            }
         }
         runProcess(process) {
             console.log("Running process", process);
@@ -191,7 +247,7 @@ var TSOS;
             _CPU.load(process);
         }
         krnTrapError(msg) {
-            TSOS.Control.hostLog("OS ERROR - TRAP: " + msg);
+            Control.hostLog("OS ERROR - TRAP: " + msg);
             // TODO: Display error on console, perhaps in some sort of colored screen. (Maybe blue?)
             this.displayVaultTecError(msg);
             this.krnShutdown();
@@ -215,4 +271,5 @@ var TSOS;
     }
     TSOS.Kernel = Kernel;
 })(TSOS || (TSOS = {}));
+export {};
 //# sourceMappingURL=kernel.js.map

@@ -8,7 +8,7 @@ module TSOS {
 
         constructor() {}
 
-        public addProcess(startLocation: number,endLocation:number){
+        public addProcessInMem(startLocation: number,endLocation:number){
             let pid: Number = this.nextPid;
             this.nextPid +=1;
             let process = {
@@ -26,6 +26,39 @@ module TSOS {
                 isExecuting : false,
                 startLocation: startLocation,
                 endLocation: endLocation,
+                currentLocation: "memory",
+                priority: 8,
+                highOrderByte: 0,
+                lowOrderByte: 0,
+                mdr:0,
+                mar:0
+
+            }
+
+            this.processMap.set(pid, process)
+
+            return pid;
+        }
+
+        public addProcessinDisk(){
+            let pid: Number = this.nextPid;
+            this.nextPid +=1;
+            let process = {
+                pid: pid,
+                instructionRegister : 0,
+                cyclePhase : 1,
+                PC : 0,
+                Acc : 0,
+                Xreg : 0,
+                Yreg : 0,
+                Zflag : false,
+                decodeStep : 1,
+                executeStep : 1,
+                carryFlag : 0,
+                isExecuting : false,
+                startLocation: 0,
+                endLocation: 0,
+                currentLocation: "disk",
                 priority: 8,
                 highOrderByte: 0,
                 lowOrderByte: 0,
@@ -38,8 +71,8 @@ module TSOS {
 
             return pid;
 
-
         }
+
 
        public checkProcess(pid: number){
         let process = this.processMap.get(pid);
@@ -74,6 +107,7 @@ module TSOS {
        public killAll(){
         this.readyQueue = [];
         this.processMap = new Map();
+
         _CPU.isExecuting = false;
         _StdOut.putText("Killed all processes");
         _StdOut.advanceLine();
@@ -135,7 +169,7 @@ module TSOS {
 
     priorityCell.textContent = process.priority;
     stateCell.textContent = process.isExecuting;
-    locationCell.textContent = this.hexlog(process.startLocation);;
+    locationCell.textContent = this.hexlog(process.currentLocation);;
     });
     this.renderReadyTable();
         }

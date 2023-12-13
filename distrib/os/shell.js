@@ -503,6 +503,12 @@ var TSOS;
             _krnDiskSystemDriver.create(filename);
         }
         shellRead(args) {
+            var filename = args[0];
+            if (!filename) {
+                _StdOut.putText("Enter filename.");
+                return;
+            }
+            _krnDiskSystemDriver.read(filename);
         }
         shellWrite(args) {
             var filename = args[0];
@@ -520,12 +526,41 @@ var TSOS;
             _krnDiskSystemDriver.write(filename, fileinput);
         }
         shellDelete(args) {
+            var filename = args[0];
+            if (!filename) {
+                _StdOut.putText("Enter filename.");
+                return;
+            }
+            _krnDiskSystemDriver.delete(filename);
         }
         shellCopy(args) {
+            var filename = args[0];
+            if (!filename) {
+                _StdOut.putText("Enter filename.");
+                return;
+            }
+            var newFilename = args[1];
+            if (!newFilename) {
+                _StdOut.putText("Enter new file");
+                return;
+            }
+            _krnDiskSystemDriver.copy(filename, newFilename);
         }
         shellRename(args) {
+            var filename = args[0];
+            if (!filename) {
+                _StdOut.putText("Enter filename.");
+                return;
+            }
+            var newFilename = args[1];
+            if (!newFilename) {
+                _StdOut.putText("Enter new filename.");
+                return;
+            }
+            _krnDiskSystemDriver.rename(filename, newFilename);
         }
         shellLs(args) {
+            _krnDiskSystemDriver.list();
         }
     }
     TSOS.Shell = Shell;

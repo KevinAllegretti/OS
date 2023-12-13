@@ -6,7 +6,7 @@ var TSOS;
         processMap = new Map();
         readyQueue = [];
         constructor() { }
-        addProcess(startLocation, endLocation) {
+        addProcessInMem(startLocation, endLocation) {
             let pid = this.nextPid;
             this.nextPid += 1;
             let process = {
@@ -24,6 +24,35 @@ var TSOS;
                 isExecuting: false,
                 startLocation: startLocation,
                 endLocation: endLocation,
+                currentLocation: "memory",
+                priority: 8,
+                highOrderByte: 0,
+                lowOrderByte: 0,
+                mdr: 0,
+                mar: 0
+            };
+            this.processMap.set(pid, process);
+            return pid;
+        }
+        addProcessinDisk() {
+            let pid = this.nextPid;
+            this.nextPid += 1;
+            let process = {
+                pid: pid,
+                instructionRegister: 0,
+                cyclePhase: 1,
+                PC: 0,
+                Acc: 0,
+                Xreg: 0,
+                Yreg: 0,
+                Zflag: false,
+                decodeStep: 1,
+                executeStep: 1,
+                carryFlag: 0,
+                isExecuting: false,
+                startLocation: 0,
+                endLocation: 0,
+                currentLocation: "disk",
                 priority: 8,
                 highOrderByte: 0,
                 lowOrderByte: 0,
@@ -114,7 +143,7 @@ var TSOS;
                 zCell.textContent = process.Zflag ? "1" : "0";
                 priorityCell.textContent = process.priority;
                 stateCell.textContent = process.isExecuting;
-                locationCell.textContent = this.hexlog(process.startLocation);
+                locationCell.textContent = this.hexlog(process.currentLocation);
                 ;
             });
             this.renderReadyTable();
