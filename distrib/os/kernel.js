@@ -6,6 +6,7 @@
      This code references page numbers in the text book:
      Operating System Concepts 8th edition by Silberschatz, Galvin, and Gagne.  ISBN 978-0-470-12872-5
      ------------ */
+//import { start } from "repl";
 var TSOS;
 (function (TSOS) {
     class Kernel {
@@ -17,25 +18,25 @@ var TSOS;
             this.userQuant = 10;
         }
         krnBootstrap() {
-            Control.hostLog("bootstrap", "host"); // Use hostLog because we ALWAYS want this, even if _Trace is off.
+            TSOS.Control.hostLog("bootstrap", "host"); // Use hostLog because we ALWAYS want this, even if _Trace is off.
             // Initialize our global queues.
-            _KernelInterruptQueue = new Queue(); // A (currently) non-priority queue for interrupt requests (IRQs).
+            _KernelInterruptQueue = new TSOS.Queue(); // A (currently) non-priority queue for interrupt requests (IRQs).
             _KernelBuffers = new Array(); // Buffers... for the kernel.
-            _KernelInputQueue = new Queue(); // Where device input lands before being processed out somewhere.
+            _KernelInputQueue = new TSOS.Queue(); // Where device input lands before being processed out somewhere.
             // Initialize the console.
-            _Console = new Console(); // The command line interface / console I/O device.
+            _Console = new TSOS.Console(); // The command line interface / console I/O device.
             _Console.init();
             // Initialize standard input and output to the _Console.
             _StdIn = _Console;
             _StdOut = _Console;
             // Load the Keyboard Device Driver
             this.krnTrace("Loading the keyboard device driver.");
-            _krnKeyboardDriver = new DeviceDriverKeyboard(); // Construct it.
+            _krnKeyboardDriver = new TSOS.DeviceDriverKeyboard(); // Construct it.
             _krnKeyboardDriver.driverEntry(); // Call the driverEntry() initialization routine.
             this.krnTrace(_krnKeyboardDriver.status);
             // load disk system
             this.krnTrace("Loading the disk system device driver.");
-            _krnDiskSystemDriver = new DeviceDriverDiskSystem(); // Construct it.
+            _krnDiskSystemDriver = new TSOS.DeviceDriverDiskSystem(); // Construct it.
             _krnDiskSystemDriver.driverEntry(); // Call the driverEntry() initialization routine.
             this.krnTrace(_krnDiskSystemDriver.status);
             // Enable the OS Interrupts.  (Not the CPU clock interrupt, as that is done in the hardware sim.)
@@ -43,7 +44,7 @@ var TSOS;
             this.krnEnableInterrupts();
             // Launch the shell.
             this.krnTrace("Creating and Launching the shell.");
-            _OsShell = new Shell();
+            _OsShell = new TSOS.Shell();
             _OsShell.init();
             // Finally, initiate student testing protocol.
             if (_GLaDOS) {
@@ -137,12 +138,12 @@ var TSOS;
         //
         krnEnableInterrupts() {
             // Keyboard
-            Devices.hostEnableKeyboardInterrupt();
+            TSOS.Devices.hostEnableKeyboardInterrupt();
             // Put more here.
         }
         krnDisableInterrupts() {
             // Keyboard
-            Devices.hostDisableKeyboardInterrupt();
+            TSOS.Devices.hostDisableKeyboardInterrupt();
             // Put more here.
         }
         krnInterruptHandler(irq, params) {
@@ -195,11 +196,11 @@ var TSOS;
                     if (_OSclock % 10 == 0) {
                         // Check the CPU_CLOCK_INTERVAL in globals.ts for an
                         // idea of the tick rate and adjust this line accordingly.
-                        Control.hostLog(msg, "OS");
+                        TSOS.Control.hostLog(msg, "OS");
                     }
                 }
                 else {
-                    Control.hostLog(msg, "OS");
+                    TSOS.Control.hostLog(msg, "OS");
                 }
             }
         }
@@ -247,7 +248,7 @@ var TSOS;
             _CPU.load(process);
         }
         krnTrapError(msg) {
-            Control.hostLog("OS ERROR - TRAP: " + msg);
+            TSOS.Control.hostLog("OS ERROR - TRAP: " + msg);
             // TODO: Display error on console, perhaps in some sort of colored screen. (Maybe blue?)
             this.displayVaultTecError(msg);
             this.krnShutdown();
@@ -271,5 +272,4 @@ var TSOS;
     }
     TSOS.Kernel = Kernel;
 })(TSOS || (TSOS = {}));
-export {};
 //# sourceMappingURL=kernel.js.map
