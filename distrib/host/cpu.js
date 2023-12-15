@@ -268,6 +268,7 @@ var TSOS;
                     break;
                 case (0xAC): //load y register from memory
                     this.Yreg = this.ma.read();
+                    console.log("Set yreg to ", this.Yreg);
                     break;
                 case (0xEC): //compare byte in memory to x register
                     var tempMem = this.ma.read();

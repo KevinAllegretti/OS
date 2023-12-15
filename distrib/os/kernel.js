@@ -66,7 +66,7 @@ var TSOS;
         saveProcessToDisk(process) {
             let data = [];
             for (let i = process.startLocation; i < process.endLocation; i++) {
-                data.push(_CPU.ma.readImmediate(i));
+                data.push(_CPU.hexlog(_CPU.ma.readImmediate(i), 2));
                 _CPU.ma.writeImmediate(i, 0);
             }
             process.startLocation = 0;
@@ -88,8 +88,7 @@ var TSOS;
             process.endLocation = startLocation + 256;
             process.currentLocation = "memory";
             for (let i = process.startLocation; i < process.endLocation; i++) {
-                _CPU.ma.writeImmediate(i, parseInt(processData[i], 16));
-                _CPU.ma.writeImmediate(i, 0);
+                _CPU.ma.writeImmediate(i, parseInt(processData[i - process.startLocation] || "00", 16));
             }
         }
         krnOnCPUClockPulse() {
@@ -110,7 +109,8 @@ var TSOS;
                     if (_CPU.pid != null) {
                         _CPU.save();
                         var oldProcess = _PCB.checkProcess(_CPU.pid);
-                        if (_PCB.readyQueue.length > 2) {
+                        var newProcess = _PCB.readyQueue[0];
+                        if (newProcess && newProcess.currentLocation != "memory") {
                             this.saveProcessToDisk(oldProcess);
                         }
                         if (oldProcess.isExecuting == true) {
@@ -210,13 +210,18 @@ var TSOS;
                 let pid = _PCB.addProcessinDisk();
                 //Tracker for memory address
                 let fileContent = [];
-                for (let i = 0; i < input.length; i += 2) {
-                    let a = input.charAt(i);
-                    let b = input.charAt(i + 1);
-                    let c = a + b;
-                    //console.log('combining ',a,'+',b, '=',parseInt(c,16))
-                    //console.log(_MemoryManager.nextProcessByte, tracker)
-                    fileContent.push(c);
+                for (let i = 0; i < 256; i += 2) {
+                    if (input.length > i) {
+                        let a = input.charAt(i);
+                        let b = input.charAt(i + 1);
+                        let c = a + b;
+                        //console.log('combining ',a,'+',b, '=',parseInt(c,16))
+                        //console.log(_MemoryManager.nextProcessByte, tracker)
+                        fileContent.push(c);
+                    }
+                    else {
+                        fileContent.push("00");
+                    }
                 }
                 let processName = "process" + pid;
                 _krnDiskSystemDriver.create(processName);

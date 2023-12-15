@@ -143,7 +143,6 @@ module TSOS {
         }
 
         public write(filename:string,input:string){
-            console.log("Writing", filename, input)
             let fileLocation = this.findFileLocation(filename);
             if (!fileLocation){
                 // add STD output here 
@@ -169,10 +168,9 @@ module TSOS {
             }
             content[60] = 1;
             let nextByteSlot = 0;
-            console.log("Starting location", firstContentLocation)
-            console.log("Starting content: ", content)
-            while (input.length > 0 && nextByteSlot < 100){
-                console.log(input);
+
+            while (input.length > 0){
+                //console.log(input);
                 let char = _CPU.fromAscii(input.charAt(0));
                 input = input.substring(1);
                 content[nextByteSlot] = char;
@@ -190,6 +188,8 @@ module TSOS {
                         content.push(0);
                     }
                     content[60] = 1;
+                    sessionStorage.setItem(nextBlockLocation, content.join("-"));
+
                     nextByteSlot = 0;
 
                     contentLocation = nextBlockLocation;
@@ -202,7 +202,6 @@ module TSOS {
 
 
         public read(filename:string){
-            console.log("reading", filename)
             let fileLocation = this.findFileLocation(filename);
             if (!fileLocation){
                 // add STD output here 
@@ -224,8 +223,6 @@ module TSOS {
             let contentLocation = firstContentLocation;
             let contentData = sessionStorage.getItem(contentLocation).split("-");
             let nextByteSlot = 0;
-            console.log("Starting location", firstContentLocation)
-            console.log("Starting content: ", contentData)
             while ( parseInt(contentData[nextByteSlot]) != 0){
                 let char = parseInt(contentData[nextByteSlot]) 
                 let ascii = _CPU.toAscii(char);
@@ -248,7 +245,6 @@ module TSOS {
         }
 
         public returnRead(filename:string):string{
-            console.log("reading", filename)
             let message = ""
             let fileLocation = this.findFileLocation(filename);
             if (!fileLocation){
@@ -271,8 +267,6 @@ module TSOS {
             let contentLocation = firstContentLocation;
             let contentData = sessionStorage.getItem(contentLocation).split("-");
             let nextByteSlot = 0;
-            console.log("Starting location", firstContentLocation)
-            console.log("Starting content: ", contentData)
             while ( parseInt(contentData[nextByteSlot]) != 0){
                 let char = parseInt(contentData[nextByteSlot]) 
                 let ascii = _CPU.toAscii(char);
@@ -297,7 +291,6 @@ module TSOS {
 
 
         public delete(filename:string){
-            console.log("delete", filename)
             let fileLocation = this.findFileLocation(filename);
             if (!fileLocation){
                 // add STD output here 
@@ -317,14 +310,11 @@ module TSOS {
 
             headerData[60] = "0";
             sessionStorage.setItem(fileLocation, headerData.join("-"));
-            console.log("Saving item" ,headerData )
 
             let firstContentLocation  = ""+nextTrack+":"+nextSect+":"+nextBlock;
             let contentLocation = firstContentLocation;
             let contentData = sessionStorage.getItem(contentLocation).split("-");
             let nextByteSlot = 0;
-            console.log("Starting location", firstContentLocation)
-            console.log("Starting content: ", contentData)
 
 
             while ( parseInt(contentData[nextByteSlot]) != 0){
